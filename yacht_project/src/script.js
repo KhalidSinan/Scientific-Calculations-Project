@@ -71,11 +71,7 @@ gltfLoader.setDRACOLoader(dracoLoader);
 let mixer = null; //??
 let yachtModel;
 gltfLoader.load("/models/yacht/scene.gltf", (gltf) => {
-<<<<<<< HEAD
   gltf.scene.scale.set(1, 1, 1);
-=======
-  gltf.scene.scale.set(2, 2, 2);
->>>>>>> a7fb0e172a6db5e5dd31af576dc14ceb6dce404a
   gltf.scene.translateY(1.125);
   yachtModel = gltf.scene;
   scene.add(yachtModel);
@@ -171,6 +167,13 @@ window.addEventListener("resize", () => {
   // Update renderer
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  // This code adds an event listener for the "resize" event,
+  // which triggers when the window is resized.
+  // When the event is triggered, 
+  //the code updates the sizes of the window, 
+  //updates the aspect ratio of the camera based on the new window size, 
+  //and updates the renderer to match the new window size and pixel ratio.
+  // This ensures that the content displayed on the webpage is responsive and adjusts properly when the window is resized.
 });
 
 /**
