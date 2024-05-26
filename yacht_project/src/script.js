@@ -181,17 +181,17 @@ window.addEventListener("resize", () => {
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(
-  75,
+  75,//represents the vertical field of view in degrees. This essentially determines how much of the scene is visible through the camera lens.
   sizes.width / sizes.height,
-  0.1,
-  1000
+  0.1,//specifies the distance from the camera where objects will start to be rendered. Anything closer to the camera than this distance will not be visible.
+  1000//specifies the distance from the camera where objects will stop being rendered. Anything further away from the camera than this distance will not be visible.
 );
 camera.position.set(0, 30, -80);
 scene.add(camera);
 
 // Controls
 const controls = new OrbitControls(camera, canvas);
-controls.enableDamping = true;
+controls.enableDamping = true;  //enables a damping effect on the controls. This means that when the user stops interacting with the controls, they will continue to move for a short period of time before coming to a gradual stop. This can make the control movements feel smoother and more natural, rather than abruptly stopping when the user releases the input.
 
 /**
  * Renderer
@@ -225,6 +225,8 @@ const effectController = {
 };
 
 function guiChanged() {
+  // This code defines a function called guiChanged() that is used to update the sky and water materials
+  // in a three.js scene based on the values of certain parameters controlled by a GUI (graphical user interface).
   const uniforms = sky.material.uniforms;
   uniforms["turbidity"].value = effectController.turbidity;
   uniforms["rayleigh"].value = effectController.rayleigh;
@@ -283,7 +285,7 @@ function init() {
 init();
 
 const tick = () => {
-  const elapsedTime = clock.getElapsedTime();
+  const elapsedTime = clock.getElapsedTime();  
 
   // Water
   water.material.uniforms["time"].value = elapsedTime;
@@ -307,6 +309,21 @@ const tick = () => {
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
+
+
+// It first gets the elapsed time using the clock.getElapsedTime() method.
+
+// It updates the water material in the scene by setting the value of the uniform variable "time" to the elapsed time. It also logs the current value of the "uBigWavesFrequency" uniform variable.
+
+// If the yachtModel exists, it updates the position of the model based on the wave elevation at its current position.
+
+// It then updates the controls, allowing the user to interact with the scene.
+
+// It renders the scene using the renderer.render(scene, camera) method.
+
+// Finally, it calls window.requestAnimationFrame(tick) to schedule the next call to the tick function on the next frame render, creating a loop for continuous updating of the scene.
+
+// Overall, this code controls the animation and interaction in a three.js scene, updating the water, yacht model position, controls, and rendering the scene on each frame.
 };
 
 tick();
@@ -332,6 +349,10 @@ function getWaveElevation(x, z, time) {
     x,
     z
   );
+  // This function calculates the wave elevation at a given position (x, z) based on the specified parameters related to big and small waves.
+  // It retrieves the values of wave elevation, frequency, speed, and iterations from the water material uniforms, 
+  //and then calls the calculateOfElevation function with these values along with the current time and the x, z position. 
+  //The calculateOfElevation function likely performs calculations to determine the wave elevation at the specified position based on the given parameters.
 }
 
 wavesFolder
