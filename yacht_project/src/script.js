@@ -71,7 +71,11 @@ gltfLoader.setDRACOLoader(dracoLoader);
 let mixer = null; //??
 let yachtModel;
 gltfLoader.load("/models/yacht/scene.gltf", (gltf) => {
+<<<<<<< HEAD
   gltf.scene.scale.set(1, 1, 1);
+=======
+  gltf.scene.scale.set(2, 2, 2);
+>>>>>>> a7fb0e172a6db5e5dd31af576dc14ceb6dce404a
   gltf.scene.translateY(1.125);
   yachtModel = gltf.scene;
   scene.add(yachtModel);
