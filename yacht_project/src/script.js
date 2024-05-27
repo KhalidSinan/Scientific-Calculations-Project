@@ -96,8 +96,6 @@ const water = new Water(waterGeometry, {
   vertexShader: waterVertexShader,
   side: THREE.DoubleSide
 });
-// water.material.vertexShader = waterVertexShader
-// water.material.fragmentShader = waterFragmentShader
 water.material.onBeforeCompile = function (shader) {
   Object.keys(waveController).forEach(controller => {
     shader.uniforms[controller] = waveController[controller]
@@ -249,7 +247,7 @@ const tick = () => {
   water.material.uniforms['time'].value = elapsedTime;
   if (yachtModel) {
     // Update yacht model position based on wave elevation
-    yachtModel.position.y = 22.5 + calculateOfElevation(elapsedTime, waveController,yachtModel.position.x, yachtModel.position.z);
+    yachtModel.position.y = 12.5 + calculateOfElevation(elapsedTime, waveController,yachtModel.position);
   }
 
   // Update controls

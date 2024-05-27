@@ -92,13 +92,13 @@ function cnoise(P) {
 }
 
 
-function calculateOfElevation(uTime, waveController, x, z) {
+function calculateOfElevation(uTime, waveController, yachtPosition) {
     // Elevation
-    var elevation = Math.sin(x * waveController.uBigWavesFrequency.value.x + uTime * waveController.uBigWavesSpeed.value) *
-        Math.sin(z * waveController.uBigWavesFrequency.value.y + uTime * waveController.uBigWavesSpeed.value) *
+    var elevation = Math.sin(yachtPosition.x * waveController.uBigWavesFrequency.value.x + uTime * waveController.uBigWavesSpeed.value) *
+        Math.sin(yachtPosition.z * waveController.uBigWavesFrequency.value.y + uTime * waveController.uBigWavesSpeed.value) *
         waveController.uBigWavesElevation.value;
     for (var i = 1.0; i <= waveController.uSmallIterations.value; i++) {
-        elevation -= Math.abs(cnoise([x * waveController.uSmallWavesFrequency.value * i, z * waveController.uSmallWavesFrequency.value * i, uTime * waveController.uSmallWavesSpeed.value])) * waveController.uSmallWavesElevation.value / i;
+        elevation -= Math.abs(cnoise([yachtPosition.x * waveController.uSmallWavesFrequency.value * i, yachtPosition.z * waveController.uSmallWavesFrequency.value * i, uTime * waveController.uSmallWavesSpeed.value])) * waveController.uSmallWavesElevation.value / i;
     }
     return elevation;
 }
