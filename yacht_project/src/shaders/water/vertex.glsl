@@ -110,6 +110,8 @@ float cnoise(vec3 P)
 void main() {
     mirrorCoord = modelMatrix * vec4( position, 1.0 );
     worldPosition = mirrorCoord.xyzw;
+    mirrorCoord = textureMatrix * mirrorCoord;
+    
     vec3 newPosition = position;
 
     float elevation = sin(mirrorCoord.x * uBigWavesFrequency.x + time * uBigWavesSpeed) *
