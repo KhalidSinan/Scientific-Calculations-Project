@@ -3,7 +3,6 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"; //OrbitControls is a helper library in Three.js that provides an easy-to-use way to control the camera in a 3D scene.
 import * as dat from "lil-gui"; //dat.GUI can be used to add controls such as sliders, buttons, and checkboxes to manipulate properties and settings of a Three.js scene.
 import waterVertexShader from "./shaders/water/vertex.glsl";
-import waterFragmentShader from "./shaders/water/fragment.glsl"; //??
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"; //which is a loader specifically designed for loading 3D models in the GLTF format.
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js"; // The DRACOLoader helps to reduce file size and improve rendering performance by compressing and decompressing geometry data.
 import { Sky } from "three/examples/jsm/objects/Sky.js";
@@ -68,7 +67,6 @@ dracoLoader.setDecoderPath("/draco/"); //The Draco loader is a JavaScript module
 const gltfLoader = new GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader);
 
-let mixer = null; //??
 let yachtModel;
 gltfLoader.load("/models/yacht/scene.gltf", (gltf) => {
   gltf.scene.scale.set(1, 1, 1);
@@ -98,10 +96,6 @@ scene.add(directionalLight);
 // Geometry
 const waterGeometry = new THREE.PlaneGeometry(2048, 2048, 512, 512);
 
-// Colors
-debugObject.depthColor = "#186691";
-debugObject.surfaceColor = "#5fbdf7";
-
 // Material
 const water = new Water(waterGeometry, {
   textureWidth: 512,
@@ -119,12 +113,9 @@ const water = new Water(waterGeometry, {
   fog: scene.fog !== undefined, // Whether fog is enabled in the scene.
 });
 water.material.vertexShader = waterVertexShader;
-// water.material.fragmentShader = waterFragmentShader
 
 // This code is setting up custom uniforms for a water material in Three.js. The onBeforeCompile function allows you to modify the shader code before it gets compiled and used in the rendering process.
 water.material.onBeforeCompile = function (shader) {    
-// uTime: A uniform representing time, used for animating the water surface.
-  shader.uniforms.uTime = { value: 0 }; 
 // uBigWavesElevation: A uniform defining the elevation of big waves in the water.
   shader.uniforms.uBigWavesElevation = { value: 0.039 };
 // uBigWavesFrequency: A uniform defining the frequency of big waves in the water, as a Vector2.
@@ -271,7 +262,6 @@ guiChanged();
 const clock = new THREE.Clock();
 
 function init() {
-  water.material.uniforms["uTime"] = { value: 0 };
   water.material.uniforms["uBigWavesElevation"] = { value: 0.039 };
   water.material.uniforms["uBigWavesFrequency"] = {
     value: new THREE.Vector2(1.361, 1.748),
@@ -289,7 +279,6 @@ const tick = () => {
 
   // Water
   water.material.uniforms["time"].value = elapsedTime;
-  console.log(water.material.uniforms["uBigWavesFrequency"].value);
   if (yachtModel) {
     // Update yacht model position based on wave elevation
     yachtModel.position.y =
