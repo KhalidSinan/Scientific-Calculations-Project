@@ -3,53 +3,34 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import * as dat from "lil-gui";
 import waterVertexShader from "./shaders/water/vertex.glsl";
-import waterFragmentShader from "./shaders/water/fragment.glsl";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { Sky } from "three/examples/jsm/objects/Sky.js";
 import { Water } from "three/examples/jsm/objects/Water.js";
 import calculateOfElevation from "./wavesYacht";
+import { addEngineControlsTo } from "./controls/engine_controls";
+import { addWaveControlsTo } from "./controls/wave_controls";
+import { addConstantsControlsTo } from "./controls/constants_controls";
+import { addWindControlsTo } from "./controls/wind_controls";
+import { addCurrentControlsTo } from "./controls/current_controls";
+import { addShipControlsTo } from "./controls/ship_controls";
+import { addFuelControlsTo } from "./controls/fuel_controls";
+import { waveController } from "./controls/wave_controls";
 /**
  * Base
  */
-const amountOfEnergyByTypeOfFuel = {
-  gasoline: [4400000, 4600000],
-  gas: [4500000, 5500000],
-  diesel: [3500000, 4000000],
-  propane: [4600000, 5000000],
-  coal: [2400000, 3500000]
-}
 
-export const panelVar = {
-  rho: 0.9,
-  fuelConsumption: 53,
-  sourceEnergyOfFuel: 53,
-  engineEfficiency: 53,
-  Vin: 355,
-  shipMass: 2000,
-  shipLength: 100,
-  shipWidth: 60,
-  shipDepth: 100,
-  Va: 100,
-  Ba: 100,
-  Vc: 100,
-  Bc: 100,
-  selectedFuelType: 'gasoline',
-};
 
 // Debug
 const gui = new dat.GUI({ width: 340 });
+addEngineControlsTo(gui)
+addFuelControlsTo(gui)
+addWaveControlsTo(gui)
+addConstantsControlsTo(gui)
+addWindControlsTo(gui)
+addCurrentControlsTo(gui)
+addShipControlsTo(gui)
 const debugObject = {};
-
-const waterFolder = gui.addFolder("Water");
-const wavesFolder = gui.addFolder("Waves");
-const sunFolder = gui.addFolder("Sun");
-const constantsFolder = gui.addFolder("Constants");
-const windFolder = gui.addFolder("Wind");
-const currentFolder = gui.addFolder("Current");
-const engineFolder = gui.addFolder("Engine");
-const shipFolder = gui.addFolder("Ship");
-// const currentFolder = gui.addFolder('Current')
 
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
@@ -64,7 +45,6 @@ dracoLoader.setDecoderPath("/draco/");
 const gltfLoader = new GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader);
 
-let mixer = null;
 let yachtModel;
 gltfLoader.load("/models/yacht/scene.gltf", (gltf) => {
   gltf.scene.scale.set(2, 2, 2);
@@ -113,22 +93,16 @@ const water = new Water(waterGeometry, {
   waterColor: 0x001e0f,
   distortionScale: 3.7,
   fog: scene.fog !== undefined,
+  vertexShader: waterVertexShader,
+  side: THREE.DoubleSide
 });
-water.material.vertexShader = waterVertexShader
+// water.material.vertexShader = waterVertexShader
 // water.material.fragmentShader = waterFragmentShader
 water.material.onBeforeCompile = function (shader) {
-
-  shader.uniforms.uTime = { value: 0 }
-  shader.uniforms.uBigWavesElevation = { value: 0.039 }
-  shader.uniforms.uBigWavesFrequency = { value: new THREE.Vector2(1.361, 1.748) }
-  shader.uniforms.uBigWavesSpeed = { value: 0.544 }
-  shader.uniforms.uSmallWavesElevation = { value: 0.074 }
-  shader.uniforms.uSmallWavesFrequency = { value: 3 }
-  shader.uniforms.uSmallWavesSpeed = { value: 0.5 }
-  shader.uniforms.uSmallIterations = { value: 4 }
-
+  Object.keys(waveController).forEach(controller => {
+    shader.uniforms[controller] = waveController[controller]
+  });
 };
-
 water.rotation.x = -Math.PI * 0.5;
 scene.add(water);
 
@@ -162,9 +136,9 @@ const camera = new THREE.PerspectiveCamera(
   75,
   sizes.width / sizes.height,
   0.1,
-  100
+  1000
 );
-camera.position.set(1, 1, 1);
+camera.position.set(1, 40, 20);
 scene.add(camera);
 
 // Controls
@@ -179,7 +153,6 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
 // Sky and Sun
 let sky, sun;
 
@@ -225,19 +198,26 @@ function guiChanged() {
   }
 }
 
+const sunFolder = gui.addFolder("Sun");
+sunFolder.close()
 sunFolder
   .add(effectController, "turbidity", 0.0, 20.0, 0.1)
   .onChange(guiChanged);
-sunFolder.add(effectController, "rayleigh", 0.0, 4, 0.001).onChange(guiChanged);
+sunFolder.add(effectController, "rayleigh", 0.0, 4, 0.001)
+.onChange(guiChanged);
 sunFolder
   .add(effectController, "mieCoefficient", 0.0, 0.1, 0.001)
   .onChange(guiChanged);
 sunFolder
   .add(effectController, "mieDirectionalG", 0.0, 1, 0.001)
   .onChange(guiChanged);
-sunFolder.add(effectController, "elevation", 0, 90, 0.1).onChange(guiChanged);
-sunFolder.add(effectController, "azimuth", -180, 180, 0.1).onChange(guiChanged);
-sunFolder.add(effectController, "exposure", 0, 1, 0.0001).onChange(guiChanged);
+sunFolder.add(effectController, "elevation", 0, 90, 0.1)
+.onChange(guiChanged);
+sunFolder.add(effectController, "azimuth", -180, 180, 0.1)
+.onChange(guiChanged);
+sunFolder.add(effectController, "exposure", 0, 1, 0.0001)
+.onChange(guiChanged);
+
 
 guiChanged();
 
@@ -247,14 +227,9 @@ guiChanged();
 const clock = new THREE.Clock();
 
 function init() {
-  water.material.uniforms['uTime'] = { value: 0 }
-  water.material.uniforms['uBigWavesElevation'] = { value: 0.039 }
-  water.material.uniforms['uBigWavesFrequency'] = { value: new THREE.Vector2(1.361, 1.748) }
-  water.material.uniforms['uBigWavesSpeed'] = { value: 0.544 }
-  water.material.uniforms['uSmallWavesElevation'] = { value: 0.074 }
-  water.material.uniforms['uSmallWavesFrequency'] = { value: 3 }
-  water.material.uniforms['uSmallWavesSpeed'] = { value: 0.5 }
-  water.material.uniforms['uSmallIterations'] = { value: 4 }
+  Object.keys(waveController).forEach(controller => {
+    water.material.uniforms[controller] = waveController[controller]
+  });
 }
 init()
 
@@ -263,10 +238,9 @@ const tick = () => {
 
   // Water
   water.material.uniforms['time'].value = elapsedTime;
-  console.log(water.material.uniforms['uBigWavesFrequency'].value)
   if (yachtModel) {
     // Update yacht model position based on wave elevation
-    yachtModel.position.y = 22.5 + getWaveElevation(yachtModel.position.x, yachtModel.position.z, elapsedTime);
+    yachtModel.position.y = 22.5 + calculateOfElevation(elapsedTime, waveController,yachtModel.position.x, yachtModel.position.z);
   }
 
   // Update controls
@@ -282,102 +256,10 @@ const tick = () => {
 tick()
 
 
-function getWaveElevation(x, z, time) {
 
-  // Calculate wave elevation at the given x, z position
-  const uBigWavesElevation = water.material.uniforms['uBigWavesElevation']
-  const uBigWavesFrequency = water.material.uniforms['uBigWavesFrequency']
-  const uBigWavesSpeed = water.material.uniforms['uBigWavesSpeed']
-  const uSmallWavesElevation = water.material.uniforms['uSmallWavesElevation']
-  const uSmallWavesFrequency = water.material.uniforms['uSmallWavesFrequency']
-  const uSmallWavesSpeed = water.material.uniforms['uSmallWavesSpeed']
-  const uSmallIterations = water.material.uniforms['uSmallIterations']
-  return calculateOfElevation(time, uBigWavesElevation, uBigWavesFrequency, uBigWavesSpeed,
-    uSmallWavesElevation, uSmallWavesFrequency, uSmallWavesSpeed, uSmallIterations, x, z);
-}
 
-wavesFolder
-  .add(water.material.uniforms['uBigWavesElevation'], "value")
-  .min(0)
-  .max(1)
-  .step(0.001)
-  .name("uBigWavesElevation");
-wavesFolder
-  .add(water.material.uniforms['uBigWavesFrequency'].value, "x")
-  .min(0)
-  .max(10)
-  .step(0.001)
-  .name("uBigWavesFrequencyX");
-wavesFolder
-  .add(water.material.uniforms['uBigWavesFrequency'].value, "y")
-  .min(0)
-  .max(10)
-  .step(0.001)
-  .name("uBigWavesFrequencyY");
-wavesFolder
-  .add(water.material.uniforms['uBigWavesSpeed'], "value")
-  .min(0)
-  .max(4)
-  .step(0.001)
-  .name("uBigWavesSpeed");
 
-wavesFolder
-  .add(water.material.uniforms['uSmallWavesElevation'], "value")
-  .min(0)
-  .max(1)
-  .step(0.001)
-  .name("uSmallWavesElevation");
-wavesFolder
-  .add(water.material.uniforms['uSmallWavesFrequency'], "value")
-  .min(0)
-  .max(30)
-  .step(0.001)
-  .name("uSmallWavesFrequency");
-wavesFolder
-  .add(water.material.uniforms['uSmallWavesSpeed'], "value")
-  .min(0)
-  .max(4)
-  .step(0.001)
-  .name("uSmallWavesSpeed");
-wavesFolder
-  .add(water.material.uniforms['uSmallIterations'], "value")
-  .min(0)
-  .max(5)
-  .step(1)
-  .name("uSmallIterations");
+// // Add option for selecting fuel type
 
-engineFolder.add(panelVar, "fuelConsumption").min(450).max(850).step(10);
-engineFolder.add(panelVar, "engineEfficiency");
-engineFolder.add(panelVar, "Vin");
-// engineFolder.add(panelVar, '')
-
-shipFolder.add(panelVar, "shipMass").min(1800).max(40000).step(100); // kilogram
-shipFolder.add(panelVar, "shipLength").min(10).max(40).step(1) // meter
-shipFolder.add(panelVar, "shipWidth").min(5).max(7).step(1);
-shipFolder.add(panelVar, "shipDepth").min(10).max(20).step(1);
-
-windFolder.add(panelVar, "Va").min(0).max(200).step(5); // kilometer
-windFolder.add(panelVar, "Ba").min(0).max(360).step(1);
-
-currentFolder.add(panelVar, "Vc").min(0).max(100).step(5);
-currentFolder.add(panelVar, "Bc").min(0).max(360).step(1);
-
-constantsFolder.add(panelVar, "rho").min(0).max(1).step(0.01);
-
-// Add option for selecting fuel type
-const fuelFolder = gui.add(panelVar, 'selectedFuelType', Object.keys(amountOfEnergyByTypeOfFuel)).name('Fuel Type');
-let tempMax = amountOfEnergyByTypeOfFuel.gasoline[0];
-let tempMin = amountOfEnergyByTypeOfFuel.gasoline[1];
-
-const engineController = engineFolder.add(panelVar, 'sourceEnergyOfFuel').min(tempMin).max(tempMax).step(1000);
-
-fuelFolder.onChange((value) => {
-  const fuelTypeData = amountOfEnergyByTypeOfFuel[value];
-  const min = fuelTypeData[0];
-  const max = fuelTypeData[1];
-
-  engineController.min(min);
-  engineController.max(max);
-});
 
 
