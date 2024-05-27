@@ -1,7 +1,7 @@
 import "./style.css";
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import * as dat from "lil-gui";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"; //OrbitControls is a helper library in Three.js that provides an easy-to-use way to control the camera in a 3D scene.
+import * as dat from "lil-gui"; //dat.GUI can be used to add controls such as sliders, buttons, and checkboxes to manipulate properties and settings of a Three.js scene.
 import waterVertexShader from "./shaders/water/vertex.glsl";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
@@ -33,21 +33,25 @@ addShipControlsTo(gui)
 const debugObject = {};
 
 // Canvas
-const canvas = document.querySelector("canvas.webgl");
+const canvas = document.querySelector("canvas.webgl"); // is used to select the canvas element with the class name "webgl" and assign it to the variable canvas.
+//This is typically used when working with Three.js to specify the canvas element where the WebGL rendering will take place.
+//In Three.js, a canvas is a HTML element used to render 3D graphics and animations. It is the area where all the 3D objects and scenes are drawn and displayed on the web page.
+// The canvas element provides a space for rendering and interacting with 3D content in a Three.js application.
+// Developers can manipulate and control the canvas to create dynamic and interactive 3D visuals using Three.js library.
 
 // Scene
-const scene = new THREE.Scene();
+const scene = new THREE.Scene(); //This statement creates a new THREE.js scene, which is basically a container that holds all the objects, lights, cameras,
 
 // Model
-const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath("/draco/");
+const dracoLoader = new DRACOLoader(); //This instance can be used to load and decode Draco compressed 3D geometry data in Three.js.
+dracoLoader.setDecoderPath("/draco/"); //The Draco loader is a JavaScript module used for loading and decoding Draco-compressed 3D models. By setting the decoder path to "/draco/", the loader will look for the decoder module in that directory when decoding Draco-compressed models.
 
 const gltfLoader = new GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader);
 
 let yachtModel;
 gltfLoader.load("/models/yacht/scene.gltf", (gltf) => {
-  gltf.scene.scale.set(2, 2, 2);
+  gltf.scene.scale.set(1, 1, 1);
   gltf.scene.translateY(1.125);
   yachtModel = gltf.scene;
   scene.add(yachtModel);
@@ -74,18 +78,14 @@ scene.add(directionalLight);
 // Geometry
 const waterGeometry = new THREE.PlaneGeometry(2048, 2048, 512, 512);
 
-// Colors
-debugObject.depthColor = "#186691";
-debugObject.surfaceColor = "#5fbdf7";
-
 // Material
 const water = new Water(waterGeometry, {
   textureWidth: 512,
   textureHeight: 512,
   waterNormals: new THREE.TextureLoader().load(
-    '/waternormals.jpg',
+    "/waternormals.jpg",
     function (texture) {
-      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+      texture.wrapS = texture.wrapT = THREE.RepeatWrapping; //Repeat water texture
     }
   ),
   sunDirection: new THREE.Vector3(),
@@ -126,6 +126,13 @@ window.addEventListener("resize", () => {
   // Update renderer
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  // This code adds an event listener for the "resize" event,
+  // which triggers when the window is resized.
+  // When the event is triggered, 
+  //the code updates the sizes of the window, 
+  //updates the aspect ratio of the camera based on the new window size, 
+  //and updates the renderer to match the new window size and pixel ratio.
+  // This ensures that the content displayed on the webpage is responsive and adjusts properly when the window is resized.
 });
 
 /**
@@ -133,7 +140,7 @@ window.addEventListener("resize", () => {
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(
-  75,
+  75,//represents the vertical field of view in degrees. This essentially determines how much of the scene is visible through the camera lens.
   sizes.width / sizes.height,
   0.1,
   1000
@@ -143,7 +150,7 @@ scene.add(camera);
 
 // Controls
 const controls = new OrbitControls(camera, canvas);
-controls.enableDamping = true;
+controls.enableDamping = true;  //enables a damping effect on the controls. This means that when the user stops interacting with the controls, they will continue to move for a short period of time before coming to a gradual stop. This can make the control movements feel smoother and more natural, rather than abruptly stopping when the user releases the input.
 
 /**
  * Renderer
@@ -176,6 +183,8 @@ const effectController = {
 };
 
 function guiChanged() {
+  // This code defines a function called guiChanged() that is used to update the sky and water materials
+  // in a three.js scene based on the values of certain parameters controlled by a GUI (graphical user interface).
   const uniforms = sky.material.uniforms;
   uniforms["turbidity"].value = effectController.turbidity;
   uniforms["rayleigh"].value = effectController.rayleigh;
@@ -188,13 +197,13 @@ function guiChanged() {
   sun.setFromSphericalCoords(1, phi, theta);
 
   uniforms["sunPosition"].value.copy(sun);
-  water.material.uniforms['sunDirection'].value.copy(sun).normalize();
+  water.material.uniforms["sunDirection"].value.copy(sun).normalize();
 
   renderer.toneMappingExposure = effectController.exposure;
   try {
     renderer.render(scene, camera);
   } catch (e) {
-    console.log(e)
+    console.log(e);
   }
 }
 
@@ -231,10 +240,10 @@ function init() {
     water.material.uniforms[controller] = waveController[controller]
   });
 }
-init()
+init();
 
 const tick = () => {
-  const elapsedTime = clock.getElapsedTime();
+  const elapsedTime = clock.getElapsedTime();  
 
   // Water
   water.material.uniforms['time'].value = elapsedTime;
@@ -251,15 +260,23 @@ const tick = () => {
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
+
+
+// It first gets the elapsed time using the clock.getElapsedTime() method.
+
+// It updates the water material in the scene by setting the value of the uniform variable "time" to the elapsed time. It also logs the current value of the "uBigWavesFrequency" uniform variable.
+
+// If the yachtModel exists, it updates the position of the model based on the wave elevation at its current position.
+
+// It then updates the controls, allowing the user to interact with the scene.
+
+// It renders the scene using the renderer.render(scene, camera) method.
+
+// Finally, it calls window.requestAnimationFrame(tick) to schedule the next call to the tick function on the next frame render, creating a loop for continuous updating of the scene.
+
+// Overall, this code controls the animation and interaction in a three.js scene, updating the water, yacht model position, controls, and rendering the scene on each frame.
 };
 
-tick()
-
-
-
-
-
-// // Add option for selecting fuel type
-
+tick();
 
 
