@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"; //OrbitControls is a helper library in Three.js that provides an easy-to-use way to control the camera in a 3D scene.
 import * as dat from "lil-gui"; //dat.GUI can be used to add controls such as sliders, buttons, and checkboxes to manipulate properties and settings of a Three.js scene.
 import waterVertexShader from "./shaders/water/vertex.glsl";
+import waterFragmentShader from "./shaders/water/fragment.glsl";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { Sky } from "three/examples/jsm/objects/Sky.js";
@@ -94,13 +95,17 @@ const water = new Water(waterGeometry, {
   distortionScale: 3.7,
   fog: scene.fog !== undefined,
   vertexShader: waterVertexShader,
-  side: THREE.DoubleSide
+  fragmentShader: waterFragmentShader,
+  side: THREE.DoubleSide,
 });
+
+water.material.vertexShader = waterVertexShader
 water.material.onBeforeCompile = function (shader) {
   Object.keys(waveController).forEach(controller => {
     shader.uniforms[controller] = waveController[controller]
   });
 };
+
 water.rotation.x = -Math.PI * 0.5;
 scene.add(water);
 
@@ -211,7 +216,7 @@ sunFolder
   .add(effectController, "turbidity", 0.0, 20.0, 0.1)
   .onChange(guiChanged);
 sunFolder.add(effectController, "rayleigh", 0.0, 4, 0.001)
-.onChange(guiChanged);
+  .onChange(guiChanged);
 sunFolder
   .add(effectController, "mieCoefficient", 0.0, 0.1, 0.001)
   .onChange(guiChanged);
@@ -219,11 +224,11 @@ sunFolder
   .add(effectController, "mieDirectionalG", 0.0, 1, 0.001)
   .onChange(guiChanged);
 sunFolder.add(effectController, "elevation", 0, 90, 0.1)
-.onChange(guiChanged);
+  .onChange(guiChanged);
 sunFolder.add(effectController, "azimuth", -180, 180, 0.1)
-.onChange(guiChanged);
+  .onChange(guiChanged);
 sunFolder.add(effectController, "exposure", 0, 1, 0.0001)
-.onChange(guiChanged);
+  .onChange(guiChanged);
 
 
 guiChanged();
@@ -241,13 +246,13 @@ function init() {
 init();
 
 const tick = () => {
-  const elapsedTime = clock.getElapsedTime();  
+  const elapsedTime = clock.getElapsedTime();
 
   // Water
   water.material.uniforms['time'].value = elapsedTime;
   if (yachtModel) {
     // Update yacht model position based on wave elevation
-    yachtModel.position.y = 12.5 + calculateOfElevation(elapsedTime, waveController,yachtModel.position);
+    yachtModel.position.y = 12.5 + calculateOfElevation(elapsedTime, waveController, yachtModel.position);
   }
 
   // Update controls
@@ -260,19 +265,19 @@ const tick = () => {
   window.requestAnimationFrame(tick);
 
 
-// It first gets the elapsed time using the clock.getElapsedTime() method.
+  // It first gets the elapsed time using the clock.getElapsedTime() method.
 
-// It updates the water material in the scene by setting the value of the uniform variable "time" to the elapsed time. It also logs the current value of the "uBigWavesFrequency" uniform variable.
+  // It updates the water material in the scene by setting the value of the uniform variable "time" to the elapsed time. It also logs the current value of the "uBigWavesFrequency" uniform variable.
 
-// If the yachtModel exists, it updates the position of the model based on the wave elevation at its current position.
+  // If the yachtModel exists, it updates the position of the model based on the wave elevation at its current position.
 
-// It then updates the controls, allowing the user to interact with the scene.
+  // It then updates the controls, allowing the user to interact with the scene.
 
-// It renders the scene using the renderer.render(scene, camera) method.
+  // It renders the scene using the renderer.render(scene, camera) method.
 
-// Finally, it calls window.requestAnimationFrame(tick) to schedule the next call to the tick function on the next frame render, creating a loop for continuous updating of the scene.
+  // Finally, it calls window.requestAnimationFrame(tick) to schedule the next call to the tick function on the next frame render, creating a loop for continuous updating of the scene.
 
-// Overall, this code controls the animation and interaction in a three.js scene, updating the water, yacht model position, controls, and rendering the scene on each frame.
+  // Overall, this code controls the animation and interaction in a three.js scene, updating the water, yacht model position, controls, and rendering the scene on each frame.
 };
 
 tick();
