@@ -92,13 +92,13 @@ function cnoise(P) {
 }
 
 
-function calculateOfElevation(uTime, uBigWavesElevation, uBigWavesFrequency, uBigWavesSpeed, uSmallWavesElevation, uSmallWavesFrequency, uSmallWavesSpeed, uSmallIterations, x, z) {
+function calculateOfElevation(uTime, waveController, x, z) {
     // Elevation
-    var elevation = Math.sin(x * uBigWavesFrequency.value.x + uTime * uBigWavesSpeed.value) *
-        Math.sin(z * uBigWavesFrequency.value.y + uTime * uBigWavesSpeed.value) *
-        uBigWavesElevation.value;
-    for (var i = 1.0; i <= uSmallIterations.value; i++) {
-        elevation -= Math.abs(cnoise([x * uSmallWavesFrequency.value * i, z * uSmallWavesFrequency.value * i, uTime * uSmallWavesSpeed.value])) * uSmallWavesElevation.value / i;
+    var elevation = Math.sin(x * waveController.uBigWavesFrequency.value.x + uTime * waveController.uBigWavesSpeed.value) *
+        Math.sin(z * waveController.uBigWavesFrequency.value.y + uTime * waveController.uBigWavesSpeed.value) *
+        waveController.uBigWavesElevation.value;
+    for (var i = 1.0; i <= waveController.uSmallIterations.value; i++) {
+        elevation -= Math.abs(cnoise([x * waveController.uSmallWavesFrequency.value * i, z * waveController.uSmallWavesFrequency.value * i, uTime * waveController.uSmallWavesSpeed.value])) * waveController.uSmallWavesElevation.value / i;
     }
     return elevation;
 }
