@@ -11,27 +11,55 @@ import { Water } from "three/examples/jsm/objects/Water.js";
 import calculateOfElevation from "./wavesYacht";
 import { addEngineControlsTo } from "./controls/engine_controls";
 import { addWaveControlsTo } from "./controls/wave_controls";
-import { addConstantsControlsTo } from "./controls/constants_controls";
-import { addWindControlsTo } from "./controls/wind_controls";
-import { addCurrentControlsTo } from "./controls/current_controls";
-import { addShipControlsTo } from "./controls/ship_controls";
+import {
+  addConstantsControlsTo,
+  constantsController,
+} from "./controls/constants_controls";
+import { addWindControlsTo, windController } from "./controls/wind_controls";
+import {
+  addCurrentControlsTo,
+  currentController,
+} from "./controls/current_controls";
+import { addShipControlsTo, shipController } from "./controls/ship_controls";
 import { addFuelControlsTo } from "./controls/fuel_controls";
 import { waveController } from "./controls/wave_controls";
+import { forces } from "./functions";
 /**
  * Base
  */
 
+const ship = {
+  position: {
+    x: 0,
+    y: 0,
+    z: 0,
+  },
+  angles: {
+    thetaX: 0,
+    thetaY: 0,
+    thetaZ: 0,
+  },
+  velocity: {
+    x: 0,
+    y: 0,
+    z: 0,
+  },
+  angularVelocity: {
+    x: 0,
+    y: 0,
+    z: 0,
+  },
+};
 
 // Debug
 const gui = new dat.GUI({ width: 340 });
-addEngineControlsTo(gui)
-addFuelControlsTo(gui)
-addWaveControlsTo(gui)
-addConstantsControlsTo(gui)
-addWindControlsTo(gui)
-addCurrentControlsTo(gui)
-addShipControlsTo(gui)
-const debugObject = {};
+addEngineControlsTo(gui);
+addFuelControlsTo(gui);
+addWaveControlsTo(gui);
+addConstantsControlsTo(gui);
+addWindControlsTo(gui);
+addCurrentControlsTo(gui);
+addShipControlsTo(gui);
 
 // Canvas
 const canvas = document.querySelector("canvas.webgl"); // is used to select the canvas element with the class name "webgl" and assign it to the variable canvas.
@@ -99,10 +127,10 @@ const water = new Water(waterGeometry, {
   side: THREE.DoubleSide,
 });
 
-water.material.vertexShader = waterVertexShader
+water.material.vertexShader = waterVertexShader;
 water.material.onBeforeCompile = function (shader) {
-  Object.keys(waveController).forEach(controller => {
-    shader.uniforms[controller] = waveController[controller]
+  Object.keys(waveController).forEach((controller) => {
+    shader.uniforms[controller] = waveController[controller];
   });
 };
 
@@ -131,9 +159,9 @@ window.addEventListener("resize", () => {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   // This code adds an event listener for the "resize" event,
   // which triggers when the window is resized.
-  // When the event is triggered, 
-  //the code updates the sizes of the window, 
-  //updates the aspect ratio of the camera based on the new window size, 
+  // When the event is triggered,
+  //the code updates the sizes of the window,
+  //updates the aspect ratio of the camera based on the new window size,
   //and updates the renderer to match the new window size and pixel ratio.
   // This ensures that the content displayed on the webpage is responsive and adjusts properly when the window is resized.
 });
@@ -143,7 +171,7 @@ window.addEventListener("resize", () => {
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(
-  75,//represents the vertical field of view in degrees. This essentially determines how much of the scene is visible through the camera lens.
+  75, //represents the vertical field of view in degrees. This essentially determines how much of the scene is visible through the camera lens.
   sizes.width / sizes.height,
   0.1,
   1000
@@ -153,7 +181,7 @@ scene.add(camera);
 
 // Controls
 const controls = new OrbitControls(camera, canvas);
-controls.enableDamping = true;  //enables a damping effect on the controls. This means that when the user stops interacting with the controls, they will continue to move for a short period of time before coming to a gradual stop. This can make the control movements feel smoother and more natural, rather than abruptly stopping when the user releases the input.
+controls.enableDamping = true; //enables a damping effect on the controls. This means that when the user stops interacting with the controls, they will continue to move for a short period of time before coming to a gradual stop. This can make the control movements feel smoother and more natural, rather than abruptly stopping when the user releases the input.
 
 /**
  * Renderer
@@ -211,25 +239,20 @@ function guiChanged() {
 }
 
 const sunFolder = gui.addFolder("Sun");
-sunFolder.close()
+sunFolder.close();
 sunFolder
   .add(effectController, "turbidity", 0.0, 20.0, 0.1)
   .onChange(guiChanged);
-sunFolder.add(effectController, "rayleigh", 0.0, 4, 0.001)
-  .onChange(guiChanged);
+sunFolder.add(effectController, "rayleigh", 0.0, 4, 0.001).onChange(guiChanged);
 sunFolder
   .add(effectController, "mieCoefficient", 0.0, 0.1, 0.001)
   .onChange(guiChanged);
 sunFolder
   .add(effectController, "mieDirectionalG", 0.0, 1, 0.001)
   .onChange(guiChanged);
-sunFolder.add(effectController, "elevation", 0, 90, 0.1)
-  .onChange(guiChanged);
-sunFolder.add(effectController, "azimuth", -180, 180, 0.1)
-  .onChange(guiChanged);
-sunFolder.add(effectController, "exposure", 0, 1, 0.0001)
-  .onChange(guiChanged);
-
+sunFolder.add(effectController, "elevation", 0, 90, 0.1).onChange(guiChanged);
+sunFolder.add(effectController, "azimuth", -180, 180, 0.1).onChange(guiChanged);
+sunFolder.add(effectController, "exposure", 0, 1, 0.0001).onChange(guiChanged);
 
 guiChanged();
 
@@ -239,8 +262,8 @@ guiChanged();
 const clock = new THREE.Clock();
 
 function init() {
-  Object.keys(waveController).forEach(controller => {
-    water.material.uniforms[controller] = waveController[controller]
+  Object.keys(waveController).forEach((controller) => {
+    water.material.uniforms[controller] = waveController[controller];
   });
 }
 init();
@@ -249,10 +272,15 @@ const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
   // Water
-  water.material.uniforms['time'].value = elapsedTime;
+  water.material.uniforms["time"].value = elapsedTime;
   if (yachtModel) {
+    move();
     // Update yacht model position based on wave elevation
-    yachtModel.position.y = 12.5 + calculateOfElevation(elapsedTime, waveController, yachtModel.position);
+    yachtModel.position.y =
+      12.5 +
+      calculateOfElevation(elapsedTime, waveController, yachtModel.position);
+    // yachtModel.position.z = zMove();
+    // yachtModel.position.x = xMove();
   }
 
   // Update controls
@@ -263,7 +291,6 @@ const tick = () => {
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
-
 
   // It first gets the elapsed time using the clock.getElapsedTime() method.
 
@@ -282,4 +309,17 @@ const tick = () => {
 
 tick();
 
-
+function move() {
+  const { x, y, z } = forces(
+    ship.velocity,
+    ship.position,
+    shipController,
+    windController,
+    currentController,
+    constantsController.rho
+  );
+  ship.position.x = x;
+  ship.position.y = y;
+  ship.position.z = z;
+  //console.log(x,y,z)
+}

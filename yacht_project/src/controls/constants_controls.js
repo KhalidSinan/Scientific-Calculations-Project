@@ -1,7 +1,7 @@
 
 
 export const constantsController = {
-    rho : 0.9,
+    rho : 0.01,
 };
 
 export const addConstantsControlsTo = (gui) => {
