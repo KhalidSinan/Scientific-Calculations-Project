@@ -9,7 +9,10 @@ import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { Sky } from "three/examples/jsm/objects/Sky.js";
 import { Water } from "three/examples/jsm/objects/Water.js";
 import calculateOfElevation from "./wavesYacht";
-import { addEngineControlsTo } from "./controls/engine_controls";
+import {
+  addEngineControlsTo,
+  engineController,
+} from "./controls/engine_controls";
 import { addWaveControlsTo } from "./controls/wave_controls";
 import {
   addConstantsControlsTo,
@@ -21,9 +24,10 @@ import {
   currentController,
 } from "./controls/current_controls";
 import { addShipControlsTo, shipController } from "./controls/ship_controls";
-import { addFuelControlsTo } from "./controls/fuel_controls";
+import { addFuelControlsTo, fuelController } from "./controls/fuel_controls";
 import { waveController } from "./controls/wave_controls";
 import { forces } from "./functions";
+import { cos } from "three/examples/jsm/nodes/Nodes.js";
 /**
  * Base
  */
@@ -83,6 +87,7 @@ gltfLoader.load("/models/yacht/scene.gltf", (gltf) => {
   gltf.scene.scale.set(1, 1, 1);
   gltf.scene.translateY(1.125);
   yachtModel = gltf.scene;
+  camera.lookAt(yachtModel.position);
   scene.add(yachtModel);
 });
 
@@ -174,7 +179,7 @@ const camera = new THREE.PerspectiveCamera(
   75, //represents the vertical field of view in degrees. This essentially determines how much of the scene is visible through the camera lens.
   sizes.width / sizes.height,
   0.1,
-  1000
+  5000
 );
 camera.position.set(1, 40, 20);
 scene.add(camera);
@@ -182,7 +187,6 @@ scene.add(camera);
 // Controls
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true; //enables a damping effect on the controls. This means that when the user stops interacting with the controls, they will continue to move for a short period of time before coming to a gradual stop. This can make the control movements feel smoother and more natural, rather than abruptly stopping when the user releases the input.
-
 /**
  * Renderer
  */
@@ -267,19 +271,22 @@ function init() {
   });
 }
 init();
-
+let prevTime = 0;
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
+  const deltaTime = elapsedTime - prevTime;
+  prevTime = elapsedTime;
 
   // Water
   water.material.uniforms["time"].value = elapsedTime;
   if (yachtModel) {
-    move();
+    move(deltaTime);
     // Update yacht model position based on wave elevation
     yachtModel.position.y =
       12.5 +
       calculateOfElevation(elapsedTime, waveController, yachtModel.position);
-    // yachtModel.position.z = zMove();
+    yachtModel.position.z = ship.position.z;
+    // console.log("esalkfj : ",yachtModel.position.z)
     // yachtModel.position.x = xMove();
   }
 
@@ -309,17 +316,18 @@ const tick = () => {
 
 tick();
 
-function move() {
-  const { x, y, z } = forces(
+function move(deltaTime) {
+  const { z, velocityZ } = forces(
     ship.velocity,
     ship.position,
     shipController,
     windController,
     currentController,
-    constantsController.rho
+    engineController,
+    fuelController,
+    constantsController,
+    deltaTime
   );
-  ship.position.x = x;
-  ship.position.y = y;
   ship.position.z = z;
-  //console.log(x,y,z)
+  ship.velocity.z = velocityZ;
 }
