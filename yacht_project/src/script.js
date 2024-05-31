@@ -27,12 +27,12 @@ import { addShipControlsTo, shipController } from "./controls/ship_controls";
 import { addFuelControlsTo, fuelController } from "./controls/fuel_controls";
 import { waveController } from "./controls/wave_controls";
 import { forces } from "./functions";
-import { cos } from "three/examples/jsm/nodes/Nodes.js";
+import './statistics.js';
 /**
  * Base
  */
 
-const ship = {
+export const ship = {
   position: {
     x: 0,
     y: 0,
@@ -53,6 +53,7 @@ const ship = {
     y: 0,
     z: 0,
   },
+  thrustForce: 0
 };
 
 // Debug
@@ -317,7 +318,7 @@ const tick = () => {
 tick();
 
 function move(deltaTime) {
-  const { z, velocityZ } = forces(
+  const { z, velocityZ, thrust } = forces(
     ship.velocity,
     ship.position,
     shipController,
@@ -328,6 +329,7 @@ function move(deltaTime) {
     constantsController,
     deltaTime
   );
+  ship.thrustForce = thrust;
   ship.position.z = z;
   ship.velocity.z = velocityZ;
 }
