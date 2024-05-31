@@ -89,7 +89,7 @@ const thrustForce = (
   Vin
 ) => {
   const A = areaOfNozzle(r);
-  const power = (fuelConsumption, sourceEnergyOfFuel, engineEfficiency)
+  const power = enginePower(fuelConsumption, sourceEnergyOfFuel, engineEfficiency)
   const Vout = (2*power / (g * 3400 * rho)) ** (1/2);
     // const Vout = volumeFlowRate(
     //   rho,
@@ -374,16 +374,16 @@ const forcesZAxis = (
   const accelerate =
     ((-visRes + airResZ + thrForce + currForceZ) /
     shipController.shipMass);
-    console.log("thrust force" , thrForce)
-    console.log("Viscous res" , -visRes)
-    console.log("air res" , airResZ)
-    console.log("curr" , currForceZ)
-    console.log("accelerate", accelerate)
-    console.log("=================")
+    // console.log("thrust force" , thrForce)
+    // console.log("Viscous res" , -visRes)
+    // console.log("air res" , airResZ)
+    // console.log("curr" , currForceZ)
+    // console.log("accelerate", accelerate)
+    // console.log("=================")
     const Vz2 = (shipVelocityZ + accelerate*time);
   const Z2 = shipPositionZ + Vz2;
   // console.log(Vz2)
-  return { z:Z2, velocityZ: Vz2 };
+  return { z:Z2, velocityZ: Vz2, thrust: thrForce };
 };
 
 // دراسة الحركة الخطية على محور الصادات
@@ -515,27 +515,27 @@ const forces = (
   constantsController,
   time
 ) => {
-  const x = forcesXAxis(
-    shipVelocity.x,
-    shipPosition.x,
-    shipController,
-    windController.angle,
-    windController.velocity,
-    currentController.angle,
-    currentController.velocity,
-    constantsController.rho,
-    time
-  );
-  const y = forcesYAxis(
-    shipVelocity.y,
-    shipPosition.y,
-    shipController.shipMass,
-    shipController.shipWidth,
-    shipController.shipLength,
-    constantsController.rho,
-    time
-  );
-  const { z, velocityZ } = forcesZAxis(
+  // const x = forcesXAxis(
+  //   shipVelocity.x,
+  //   shipPosition.x,
+  //   shipController,
+  //   windController.angle,
+  //   windController.velocity,
+  //   currentController.angle,
+  //   currentController.velocity,
+  //   constantsController.rho,
+  //   time
+  // );
+  // const y = forcesYAxis(
+  //   shipVelocity.y,
+  //   shipPosition.y,
+  //   shipController.shipMass,
+  //   shipController.shipWidth,
+  //   shipController.shipLength,
+  //   constantsController.rho,
+  //   time
+  // );
+  const { z, velocityZ, thrust } = forcesZAxis(
     shipVelocity.z,
     shipPosition.z,
     windController.angle,
@@ -549,7 +549,7 @@ const forces = (
     time,
   );
   // console.log(z, velocityZ)
-  return { z, velocityZ  };
+  return { z, velocityZ, thrust };
 };
 
 // دراسة الحركة الدورانية
