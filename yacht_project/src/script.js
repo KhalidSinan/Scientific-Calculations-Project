@@ -53,7 +53,10 @@ export const ship = {
     y: 0,
     z: 0,
   },
-  thrustForce: 0
+  thrustForce: 0,
+  visRes: 0,
+  airResZ: 0,
+  currForceZ: 0,
 };
 
 // Debug
@@ -318,7 +321,7 @@ const tick = () => {
 tick();
 
 function move(deltaTime) {
-  const { z, velocityZ, thrust } = forces(
+  const { z, velocityZ, thrust, visRes, airResZ, currForceZ } = forces(
     ship.velocity,
     ship.position,
     shipController,
@@ -330,6 +333,9 @@ function move(deltaTime) {
     deltaTime
   );
   ship.thrustForce = thrust;
+  ship.visRes = visRes;
+  ship.airResZ = airResZ;
+  ship.currForceZ = currForceZ;
   ship.position.z = z;
   ship.velocity.z = velocityZ;
 }

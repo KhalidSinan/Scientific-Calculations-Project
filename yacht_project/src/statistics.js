@@ -62,6 +62,9 @@ setInterval(() => {
   <br>
   <h3>Forces:</h3>
   <h4>Thrust: ${ship.thrustForce} </h4>
+  <h4>Air Res Z: ${ship.airResZ} </h4>
+  <h4>Current Force Z: ${ship.currForceZ} </h4>
+  <h4>Viscous Res: ${ship.visRes} </h4>
   <br>
   `;
 }, 300);

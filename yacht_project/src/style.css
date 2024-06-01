@@ -24,6 +24,7 @@ body
     border: solid 3px #76B6C4;
     border-radius: 8px;
     background-color: white;
+    cursor: pointer;
 }
 
 #statsButton {
@@ -62,4 +63,5 @@ body
     width: 20px;
     height: 20px;
     border: 2px solid #fff;
+    cursor: pointer;
 }
