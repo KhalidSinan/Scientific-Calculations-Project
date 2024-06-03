@@ -276,6 +276,9 @@ function init() {
 }
 init();
 let prevTime = 0;
+var dir = new THREE.Vector3();
+var sph = new THREE.Spherical();
+
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
   const deltaTime = elapsedTime - prevTime;
@@ -297,9 +300,12 @@ const tick = () => {
   // Update controls
   controls.update();
 
+  camera.getWorldDirection(dir);
+  sph.setFromVector3(dir);
+  const compass = document.getElementById('compassContainer')
+  compass.style.transform = `rotate(${THREE.Math.radToDeg(sph.theta) - 180}deg)`;
   // Render
   renderer.render(scene, camera);
-
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
 

@@ -17,6 +17,22 @@ statsButton.onclick = () => {
   }
 };
 
+document.addEventListener("keydown", (event) => {
+  if (event.key === "o") {
+    if (statsPanel.style.display === "none") {
+      statsPanel.style.display = "block";
+      statsButton.textContent = "Close Stats";
+    } else {
+      statsPanel.style.display = "none";
+      statsButton.textContent = "Show Stats";
+    }
+  }
+  if(event.key == 'r'){
+    restartButton.click();
+  }
+});
+
+
 restartButton.onclick = () => {
   ship.position.x = 0
   ship.position.y = 0
