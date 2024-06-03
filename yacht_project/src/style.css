@@ -65,3 +65,9 @@ body
     border: 2px solid #fff;
     cursor: pointer;
 }
+
+#compassContainer {
+    position: absolute;
+    left: 0rem;
+    bottom: 0rem;
+}
