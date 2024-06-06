@@ -327,7 +327,7 @@ const tick = () => {
 tick();
 
 function move(deltaTime) {
-  const { z, velocityZ, thrust, visRes, airResZ, currForceZ } = forces(
+  const { accelerate, z, velocityZ, thrust, visRes, airResZ, currForceZ } = forces(
     ship.velocity,
     ship.position,
     shipController,
@@ -338,10 +338,14 @@ function move(deltaTime) {
     constantsController,
     deltaTime
   );
+  console.log('acc: ', accelerate)
   ship.thrustForce = thrust;
   ship.visRes = visRes;
   ship.airResZ = airResZ;
   ship.currForceZ = currForceZ;
-  ship.position.z = z;
-  ship.velocity.z = velocityZ;
+
+  const maxSpeed = ((9.81 * shipController.shipLength * 2) ** (1 / 2)) * 1
+  ship.velocity.z = Math.min(ship.velocity.z, maxSpeed)
+  ship.position.z += (ship.velocity.z * deltaTime);
+  ship.velocity.z += (accelerate * deltaTime);
 }

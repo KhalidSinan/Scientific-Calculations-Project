@@ -21,7 +21,7 @@ body
 .customButton {
     padding: 8px;
     color: blue;
-    border: solid 3px #76B6C4;
+    border: solid 3px #2D4563;
     border-radius: 8px;
     background-color: white;
     cursor: pointer;
@@ -34,7 +34,7 @@ body
 }
 
 #statsPanel {
-    background-color: #76B6C4 ;
+    background-color: #2D4563 ;
     color: white;
     position: absolute;
     border-radius: 8px;

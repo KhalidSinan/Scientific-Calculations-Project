@@ -1,11 +1,11 @@
-
-
 export const constantsController = {
-    rho : 1029,
+    waterDensity: 1029,
+    airDensity: 1,
 };
 
 export const addConstantsControlsTo = (gui) => {
-const constantsFolder = gui.addFolder("Constants");
-constantsFolder.add(constantsController, "rho").min(0).max(1).step(0.01);
-constantsFolder.close()
+    const constantsFolder = gui.addFolder("Constants");
+    constantsFolder.add(constantsController, "waterDensity").min(0).max(1100).step(0.01);
+    constantsFolder.add(constantsController, "airDensity").min(0).max(2).step(0.01);
+    constantsFolder.close()
 }
