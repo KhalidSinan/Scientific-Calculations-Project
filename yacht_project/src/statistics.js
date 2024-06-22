@@ -27,7 +27,7 @@ document.addEventListener("keydown", (event) => {
       statsButton.textContent = "Show Stats";
     }
   }
-  if(event.key == 'r'){
+  if (event.key == 'r') {
     restartButton.click();
   }
 });
@@ -78,9 +78,17 @@ setInterval(() => {
   <br>
   <h3>Forces:</h3>
   <h4>Thrust: ${ship.thrustForce} </h4>
-  <h4>Air Res Z: ${ship.airResZ} </h4>
-  <h4>Current Force Z: ${ship.currForceZ} </h4>
-  <h4>Viscous Res: ${ship.visRes} </h4>
+  <h4>Air Res Z-Axis: ${ship.airRes.z} </h4>
+  <h4>Current Force Z-Axis: ${ship.currForce.z} </h4>
+  <h4>Viscous Resistance Z-Axis: ${ship.visRes.z} </h4>
+  <br>
+  <h4>Air Res X-Axis: ${ship.airRes.x} </h4>
+  <h4>Current Force X-Axis: ${ship.currForce.x} </h4>
+  <h4>Viscous Resistance X-Axis: ${ship.visRes.x} </h4>
+  <br>
+  <h4>Viscous Resistance Y-Axis: ${ship.visRes.y} </h4>
+  <h4>Weight: ${ship.weight} </h4>
+  <h4>Bouyancy: ${ship.bouyanceForce} </h4>
   <br>
   `;
 }, 300);
