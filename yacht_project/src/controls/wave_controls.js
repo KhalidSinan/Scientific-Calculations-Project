@@ -62,5 +62,5 @@ export const addWaveControlsTo = (gui) => {
     .max(5)
     .step(1)
     .name("uSmallIterations");
-    wavesFolder.close()
+  wavesFolder.close()
 };

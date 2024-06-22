@@ -1,26 +1,26 @@
 
 export const engineController = {
-    fuelConsumption: 100,
-    engineEfficiency: 0.6,
-    Vin: 0,
-  };
+  fuelConsumption: 100,
+  engineEfficiency: 0.6,
+  Vin: 0,
+};
 
 export const addEngineControlsTo = (gui) => {
   const engineFolder = gui.addFolder("Engine");
   engineFolder.add(engineController, "Vin")
-  .min(0)
-  .max(200)
-  .step(1);
+    .min(0)
+    .max(20)
+    .step(0.1);
   engineFolder.add(engineController, "engineEfficiency")
-  .min(0)
-  .max(1)
-  .step(0.01);
+    .min(0)
+    .max(1)
+    .step(0.01);
   engineFolder
     .add(engineController, "fuelConsumption")
     .min(75)
     .max(200)
     .step(10);
-    engineFolder.close()
+  engineFolder.close()
 };
 
 

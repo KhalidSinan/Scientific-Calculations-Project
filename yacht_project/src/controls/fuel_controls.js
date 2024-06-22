@@ -1,13 +1,13 @@
 const amountOfEnergyByTypeOfFuel = {
-  gasoline: [4400000, 4600000],
-  gas: [4500000, 5500000],
-  diesel: [3500000, 4000000],
-  propane: [4600000, 5000000],
-  coal: [2400000, 3500000],
+  gasoline: [44000000, 46000000],
+  gas: [45000000, 55000000],
+  diesel: [35000000, 40000000],
+  propane: [46000000, 50000000],
+  coal: [24000000, 35000000],
 };
 
 export const fuelController = {
-  sourceEnergyOfFuel: 4500000,
+  sourceEnergyOfFuel: 45000000,
   selectedFuelType: "gasoline",
 };
 
@@ -23,12 +23,12 @@ export const addFuelControlsTo = (gui) => {
       Object.keys(amountOfEnergyByTypeOfFuel)
     )
     .onChange((value) => {
-        const fuelTypeData = amountOfEnergyByTypeOfFuel[value];
-        const min = fuelTypeData[0];
-        const max = fuelTypeData[1];
-        engineController.min(min);
-        engineController.max(max);
-      })
+      const fuelTypeData = amountOfEnergyByTypeOfFuel[value];
+      const min = fuelTypeData[0];
+      const max = fuelTypeData[1];
+      engineController.min(min);
+      engineController.max(max);
+    })
     .name("Fuel Type");
   const engineController = fuelFolder
     .add(fuelController, "sourceEnergyOfFuel")
