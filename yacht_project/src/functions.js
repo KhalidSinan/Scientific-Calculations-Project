@@ -60,13 +60,8 @@ const wettedSurfaceArea = (shipMass, shipWidth, shipLength, rho) => {
 
 const shipDraft = (mass, width, length, rho) => {
   // الجزء المغمور
-<<<<<<< HEAD
-  const submerged = mass / rho;
-  const draft = (submerged / (length * width)) * 3;
-=======
   const submerged = (mass / rho)
   const draft = submerged / (length * width);
->>>>>>> 33f00f3946e8ac6da2beff4badfcb0d21fc1ae0e
   return draft;
 };
 
@@ -470,15 +465,9 @@ const forcesYAxis = (
   // To Make VisRes against movement
   // Resistance is agains movement always
   const visResSign = shipVelocityY > 0 ? -1 : 1;
-<<<<<<< HEAD
-  visRes = visResSign * visRes;
-=======
   visRes = visResSign * visRes
 
->>>>>>> 33f00f3946e8ac6da2beff4badfcb0d21fc1ae0e
-  // Maybe dont need to add visRes
   let accelerate = (-wghForce + bouyanceForce + visRes) / shipMass;
-  if (bouyanceForce > wghForce) accelerate = 0;
   return {
     accelerateY: accelerate,
     wghForce: wghForce,
