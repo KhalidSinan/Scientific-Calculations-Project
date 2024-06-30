@@ -15,7 +15,7 @@ const mToft = (number) => {
 
 const msTofts = (number) => {
   return number * 3.2808399;
-}
+};
 
 // مهملات
 const P0 = 1053.52;
@@ -32,17 +32,20 @@ const Cy = 0.1;
 const Cz = 0.1;
 const B = 0;
 
-
 // قانون برنولي
 const bernoly = (rho, pressure, waterVelocity, z) => {
   const rhoInPoundft3 = kgm3Topoundft3(rho);
-  return pressure + 0.5 * rhoInPoundft3 * msTofts(waterVelocity) ** 2 + rhoInPoundft3 * g * z;
+  return (
+    pressure +
+    0.5 * rhoInPoundft3 * msTofts(waterVelocity) ** 2 +
+    rhoInPoundft3 * g * z
+  );
 };
 
 // قوة الثقل
 const shipWeight = (shipMass) => {
-  return shipMass * g
-}
+  return shipMass * g;
+};
 
 const shipLWL = (shipLength) => {
   const lengthInFt = mToft(shipLength);
@@ -51,32 +54,49 @@ const shipLWL = (shipLength) => {
 
 // we may use the water line instead of lenght of the ship.
 const wettedSurfaceArea = (shipMass, shipWidth, shipLength, rho) => {
-  const draft = shipDraft(shipMass, shipWidth, shipLength, rho)
-  return shipLength * (draft + shipWidth)
+  const draft = shipDraft(shipMass, shipWidth, shipLength, rho);
+  return shipLength * (draft + shipWidth);
 };
-
 
 const shipDraft = (mass, width, length, rho) => {
   // الجزء المغمور
-  const submerged = (mass / rho)
-  const draft = submerged / (length * width) * 3;
+  const submerged = mass / rho;
+  const draft = (submerged / (length * width)) * 3;
   return draft;
 };
 
-
-const wettedSurfaceVolume = (shipMass, shipWidth, shipLength, maxDraft, rho) => {
+const wettedSurfaceVolume = (
+  shipMass,
+  shipWidth,
+  shipLength,
+  maxDraft,
+  rho
+) => {
   // Calculate draft then compare with max draft in ship
   let draft = shipDraft(shipMass, shipWidth, shipLength, rho);
-  draft = Math.min(maxDraft, draft)
+  draft = Math.min(maxDraft, draft);
   return shipWidth * draft * shipLength;
 };
 
 // قوة الطفو
-const bouyancyForce = (shipMass, shipWidth, shipLength, maxDraft, shipDepth, rho) => {
+const bouyancyForce = (
+  shipMass,
+  shipWidth,
+  shipLength,
+  maxDraft,
+  shipDepth,
+  rho
+) => {
   // Calculate max draft in ship
-  const maxDraftToSend = maxDraft * shipDepth
-  const volume = wettedSurfaceVolume(shipMass, shipWidth, shipLength, maxDraftToSend, rho);
-  return rho * volume * g
+  const maxDraftToSend = maxDraft * shipDepth;
+  const volume = wettedSurfaceVolume(
+    shipMass,
+    shipWidth,
+    shipLength,
+    maxDraftToSend,
+    rho
+  );
+  return rho * volume * g;
 };
 
 //------------------------------------------------------------
@@ -116,7 +136,7 @@ const volumeFlowRate = (
   );
   return (A ** 2 * (((2 * power) / rho) * g)) ** (1 / 3);
 };
-``
+``;
 // قوة الدفع
 const thrustForce = (
   r,
@@ -127,14 +147,15 @@ const thrustForce = (
   Vin
 ) => {
   const A = areaOfNozzle(r);
-  let Vout = volumeFlowRate(
-    rho,
-    A,
-    fuelConsumption,
-    sourceEnergyOfFuel,
-    engineEfficiency
-  ) / A;
-  const M = A * Vin * rho
+  let Vout =
+    volumeFlowRate(
+      rho,
+      A,
+      fuelConsumption,
+      sourceEnergyOfFuel,
+      engineEfficiency
+    ) / A;
+  const M = A * Vin * rho;
   return Math.max(0, M * (Vout - Vin));
 };
 
@@ -147,7 +168,8 @@ const areaOfNozzle = (r) => {
 const enginePower = (fuelConsumption, sourceEnergyOfFuel, engineEfficiency) => {
   // * 3600 to convert hours to seconds
   return (
-    (fuelConsumption * sourceEnergyOfFuel * engineEfficiency) / (enginePowerTime * 3600)
+    (fuelConsumption * sourceEnergyOfFuel * engineEfficiency) /
+    (enginePowerTime * 3600)
   );
 };
 
@@ -206,7 +228,7 @@ const airResistanceY = (
     windVelocity
   );
   const rhoInPoundft3 = kgm3Topoundft3(rho);
-  const lengthInFt = mToft(shipLength)
+  const lengthInFt = mToft(shipLength);
   const S = wettedSurfaceArea(shipMass, shipWidth, shipLength, rho);
   return 0.5 * rhoInPoundft3 * S * Vra * Vra * Cay * lengthInFt;
 };
@@ -217,8 +239,8 @@ const airResistanceRelativeVelocity = (
   windAngle,
   windVelocity
 ) => {
-  const Vrz = (windVelocity) * Math.cos(windAngle) - shipVelocity;
-  const Vrx = (windVelocity) * Math.sin(windAngle);
+  const Vrz = windVelocity * Math.cos(windAngle) - shipVelocity;
+  const Vrx = windVelocity * Math.sin(windAngle);
   return (Vrz * Vrz + Vrx * Vrx) ** (1 / 2);
 };
 
@@ -231,7 +253,7 @@ const viscousResistance = (
   rho
 ) => {
   const S = wettedSurfaceArea(shipMass, shipWidth, shipLength, rho);
-  return 0.5 * rho * Cf * S * (shipVelocity ** 2);
+  return 0.5 * rho * Cf * S * shipVelocity ** 2;
 };
 
 // قوة التيار
@@ -287,7 +309,7 @@ const currentForceY = (
     currentVelocity
   );
   const rhoInPoundft3 = kgm3Topoundft3(rho);
-  const lengthInFt = mToft(shipLength)
+  const lengthInFt = mToft(shipLength);
   const S = wettedSurfaceArea(shipMass, shipWidth, shipLength, rho);
   return 0.5 * rhoInPoundft3 * S * lengthInFt * Vrv * Vrv * Cy;
 };
@@ -298,10 +320,10 @@ const currentRelativeVelocity = (
   currentAngle,
   currentVelocity
 ) => {
-  const Vx = (shipVelocity) * Math.sin(B);
-  const Vz = (shipVelocity) * Math.cos(B);
-  const Vrvz = Vz - (currentVelocity) * Math.cos(currentAngle);
-  const Vrvx = Vx - (currentVelocity) * Math.sin(currentAngle);
+  const Vx = shipVelocity * Math.sin(B);
+  const Vz = shipVelocity * Math.cos(B);
+  const Vrvz = Vz - currentVelocity * Math.cos(currentAngle);
+  const Vrvx = Vx - currentVelocity * Math.sin(currentAngle);
   return Math.sqrt(Vrvz * Vrvz + Vrvx * Vrvx);
 };
 
@@ -312,27 +334,26 @@ function degToRad(degree) {
 
 // (* 1000 / 3600) to convert from km/h to m/s
 function windZ(windAngle, windVelocity) {
-  windAngle = degToRad(windAngle)
-  return Math.cos(windAngle) * windVelocity * 1000 / 3600
+  windAngle = degToRad(windAngle);
+  return (Math.cos(windAngle) * windVelocity * 1000) / 3600;
 }
 
 function currentZ(currentAngle, currentVelocity) {
-  currentAngle = degToRad(currentAngle)
-  return Math.cos(currentAngle) * currentVelocity * 1000 / 3600
+  currentAngle = degToRad(currentAngle);
+  return (Math.cos(currentAngle) * currentVelocity * 1000) / 3600;
 }
 
 function windX(windAngle, windVelocity) {
   windAngle = degToRad(windAngle);
   const sinAngle = Math.sin(windAngle);
-  return sinAngle * windVelocity * 1000 / 3600;
+  return (sinAngle * windVelocity * 1000) / 3600;
 }
 
 function currentX(currentAngle, currentVelocity) {
   currentAngle = degToRad(currentAngle);
   const sinAngle = Math.sin(currentAngle);
-  return sinAngle * currentVelocity * 1000 / 3600;
+  return (sinAngle * currentVelocity * 1000) / 3600;
 }
-
 
 // دراسة الحركة الخطية على محور السينات
 const forcesXAxis = (
@@ -342,7 +363,7 @@ const forcesXAxis = (
   windVelocity,
   currentAngle,
   currentVelocity,
-  rho,
+  rho
 ) => {
   let visRes = viscousResistance(
     shipVelocityX,
@@ -351,23 +372,22 @@ const forcesXAxis = (
     shipController.shipLength,
     rho
   );
-  const windXAxis = windX(windAngle, windVelocity)
-  const currentXAxis = currentX(currentAngle, currentVelocity)
-  // To Make VisRes against movement 
+  const windXAxis = windX(windAngle, windVelocity);
+  const currentXAxis = currentX(currentAngle, currentVelocity);
+  // To Make VisRes against movement
   // Resistance is agains movement always
   const visResSign = shipVelocityX > 0 ? -1 : 1;
-  visRes = visResSign * visRes
+  visRes = visResSign * visRes;
 
   const accelerateX =
-    (visRes + windXAxis + currentXAxis) /
-    shipController.shipMass
+    (visRes + windXAxis + currentXAxis) / shipController.shipMass;
 
   return {
     accelerateX: accelerateX,
     airResX: windXAxis,
     currForceX: currentXAxis,
     visResX: visRes,
-  }
+  };
 };
 
 // دراسة الحركة الخطية على محور العينات
@@ -380,7 +400,7 @@ const forcesZAxis = (
   shipController,
   engineController,
   fuelController,
-  constantsController,
+  constantsController
 ) => {
   let visRes = viscousResistance(
     Math.abs(shipVelocityZ),
@@ -397,15 +417,15 @@ const forcesZAxis = (
     constantsController.waterDensity,
     engineController.Vin
   );
-  const windZAxis = windZ(windAngle, windVelocity)
-  const currentZAxis = currentZ(currentAngle, currentVelocity)
-  // To Make VisRes against movement 
+  const windZAxis = windZ(windAngle, windVelocity);
+  const currentZAxis = currentZ(currentAngle, currentVelocity);
+  // To Make VisRes against movement
   // Resistance is agains movement always
   const visResSign = shipVelocityZ > 0 ? -1 : 1;
-  visRes = visResSign * visRes
+  visRes = visResSign * visRes;
 
   const accelerateZ =
-    (thrForce + windZAxis + currentZAxis + visRes) / (shipController.shipMass);
+    (thrForce + windZAxis + currentZAxis + visRes) / shipController.shipMass;
   return {
     accelerateZ: accelerateZ,
     thrust: thrForce,
@@ -423,7 +443,7 @@ const forcesYAxis = (
   shipLength,
   maxDraft,
   shipDepth,
-  rho,
+  rho
 ) => {
   const wghForce = shipWeight(shipMass);
   const bouyanceForce = bouyancyForce(
@@ -442,15 +462,13 @@ const forcesYAxis = (
     rho
   );
 
-  // To Make VisRes against movement 
+  // To Make VisRes against movement
   // Resistance is agains movement always
   const visResSign = shipVelocityY > 0 ? -1 : 1;
-  visRes = visResSign * visRes
-  console.log(wghForce, bouyanceForce, visRes)
-
+  visRes = visResSign * visRes;
   // Maybe dont need to add visRes
-  let accelerate = (-wghForce + bouyanceForce + visRes) / shipMass
-  if (bouyanceForce > wghForce) accelerate = 0
+  let accelerate = (-wghForce + bouyanceForce + visRes) / shipMass;
+  if (bouyanceForce > wghForce) accelerate = 0;
   return {
     accelerateY: accelerate,
     wghForce: wghForce,
@@ -460,8 +478,9 @@ const forcesYAxis = (
 };
 
 // العزم
-const tao = (F, d) => {
-  return F * d;
+const tao = (F, d, angle = 90) => {
+  angle = degToRad(angle);
+  return F * d * Math.sin(angle);
 };
 
 // عزم العطالة
@@ -471,7 +490,8 @@ const inertiaX = (shipMass, shipLength, shipDepth) => {
   );
 };
 
-const inertiaY = (shipMass, shipLength, shipWidth) => {
+const inertiaY = (shipController) => {
+  const { shipMass, shipWidth, shipLength } = shipController;
   return (
     (1 / 12) * shipMass * (shipWidth * shipWidth + shipLength * shipLength)
   );
@@ -484,24 +504,29 @@ const inertiaZ = (shipMass, shipWidth, shipDepth) => {
 const taoXAxis = (
   thetaX1,
   shipAngularVelocityX1,
-  shipMass,
-  shipLength,
-  shipDepth,
-  shipWidth,
-  windAngle,
-  windVelocity,
-  currentAngle,
-  currentVelocity
+  shipController,
+  windController,
+  currentController
 ) => {
-  const wghForce = tao(shipWeight(shipMass), 0);
+  const wghForce = tao(shipWeight(shipController.shipMass), 0);
   const bouyanceForce = tao(bouyancyForce(), 0);
-  const visRes = tao(viscousResistance(shipAngularVelocityX1), shipWidth / 2);
-  const airResX = tao(airResistanceX(windAngle, windVelocity), shipWidth / 2);
-  const currForceX = tao(
-    currentForceX(currentAngle, currentVelocity),
-    shipWidth / 2
+  const visRes = tao(
+    viscousResistance(shipAngularVelocityX1),
+    shipController.shipWidth / 2
   );
-  const IdeltaX = inertiaX(shipMass, shipLength, shipDepth);
+  const airResX = tao(
+    airResistanceX(windController.angle, windController.velocity),
+    shipController.shipWidth / 2
+  );
+  const currForceX = tao(
+    currentForceX(currentController.angle, currentController.velocity),
+    shipController.shipWidth / 2
+  );
+  const IdeltaX = inertiaX(
+    shipController.shipMass,
+    shipController.shipLength,
+    shipController.shipDepth
+  );
   const angularAccelerationX =
     (wghForce + bouyanceForce + visRes + airResX + currForceX) / IdeltaX;
   const shipAngularVelocityX2 = shipAngularVelocityX1 + angularAccelerationX;
@@ -513,28 +538,70 @@ const taoXAxis = (
 const taoYAxis = (
   thetaY1,
   shipAngularVelocityY1,
-  shipMass,
-  shipLength,
-  shipWidth,
-  windAngle,
-  windVelocity,
-  currentAngle,
-  currentVelocity
+  shipController,
+  windController,
+  currentController,
+  engineController,
+  fuelController,
+  rho
 ) => {
-  const wghForce = tao(shipWeight(shipMass), 0);
-  const bouyanceForce = tao(bouyancyForce(), 0);
-  const visRes = tao(viscousResistance(shipAngularVelocityY1), shipWidth / 2);
-  const airResY = tao(airResistanceY(windAngle, windVelocity), shipWidth / 2);
-  const currForceY = tao(
-    currentForceY(currentAngle, currentVelocity),
-    shipWidth / 2
+  const wghForce = tao(shipWeight(shipController.shipMass), 0);
+  const thrForce = tao(
+    thrustForce(
+      shipController.nozzleRadius,
+      engineController.fuelConsumption,
+      fuelController.sourceEnergyOfFuel,
+      engineController.engineEfficiency,
+      rho,
+      engineController.Vin
+    ),
+    shipController.shipLength / 2,
+    thetaY1,
   );
-  const IdeltaY = inertiaY(shipMass, shipLength, shipWidth);
+  const bouyanceForce = tao(
+    bouyancyForce(
+      shipController.shipMass,
+      shipController.shipWidth,
+      shipController.shipLength,
+      shipController.maxDraft,
+      shipController.shipDepth,
+      rho
+    ),
+    0
+  );
+  let visRes = tao(
+    viscousResistance(
+      shipAngularVelocityY1,
+      shipController.shipMass,
+      shipController.shipWidth,
+      shipController.shipLength,
+      rho
+    ),
+    shipController.shipWidth / 2
+  );
+  const airResY = tao(
+    windX(windController.angle, windController.velocity),
+    shipController.shipWidth / 2
+  );
+  const currForceY = tao(
+    currentX(currentController.angle, currentController.velocity),
+    shipController.shipWidth / 2
+  );
+  const visResSign = shipAngularVelocityY1 > 0 ? -1 : 1;
+  visRes = visResSign * visRes;
+  const IdeltaY = inertiaY(shipController);
   const angularAccelerationY =
-    (wghForce + bouyanceForce + visRes + airResY + currForceY) / IdeltaY;
-  const shipAngularVelocityY2 = shipAngularVelocityY1 + angularAccelerationY;
-  const thetaY2 = thetaY1 + shipAngularVelocityY2;
-  return thetaY2;
+    (wghForce + bouyanceForce + visRes + airResY + currForceY + thrForce) / IdeltaY;
+  console.log(angularAccelerationY);
+  // const angularVelocityY2 = angularVelocityY1 + angularAccelerationY;
+  // const thetaY2 = thetaY1 + angularVelocityY2;
+  return {
+    angularAccelerationY,
+    thrForceY: thrForce,
+    visResTaoY: visRes,
+    airResY,
+    currForceY,
+  };
 };
 
 // دراسة الحركة الدورانية على محور العينات
@@ -573,7 +640,7 @@ const forces = (
   currentController,
   engineController,
   fuelController,
-  constantsController,
+  constantsController
 ) => {
   const { accelerateX, airResX, currForceX, visResX } = forcesXAxis(
     shipVelocity.x,
@@ -582,7 +649,7 @@ const forces = (
     windController.velocity,
     currentController.angle,
     currentController.velocity,
-    constantsController.waterDensity,
+    constantsController.waterDensity
   );
   const { accelerateY, wghForce, bouyanceForce, visResY } = forcesYAxis(
     shipVelocity.y,
@@ -591,7 +658,7 @@ const forces = (
     shipController.shipLength,
     shipController.maxDraft,
     shipController.shipDepth,
-    constantsController.waterDensity,
+    constantsController.waterDensity
   );
   const { accelerateZ, thrust, visResZ, airResZ, currForceZ } = forcesZAxis(
     shipVelocity.z,
@@ -602,61 +669,72 @@ const forces = (
     shipController,
     engineController,
     fuelController,
-    constantsController,
+    constantsController
   );
-  return { accelerateZ, thrust, visResZ, airResZ, currForceZ, accelerateY, wghForce, bouyanceForce, visResY, accelerateX, airResX, currForceX, visResX };
+  return {
+    accelerateZ,
+    thrust,
+    visResZ,
+    airResZ,
+    currForceZ,
+    accelerateY,
+    wghForce,
+    bouyanceForce,
+    visResY,
+    accelerateX,
+    airResX,
+    currForceX,
+    visResX,
+  };
 };
 
 // دراسة الحركة الدورانية
 const rotations = (
-  shipAngle,
-  shipAngularVelocity,
-  shipMass,
-  shipLength,
-  shipDepth,
-  shipWidth,
-  windAngle,
-  windVelocity,
-  currentAngle,
-  currentVelocity
+  ship,
+  shipController,
+  windController,
+  currentController,
+  engineController,
+  fuelController,
+  rho
 ) => {
-  const ThetaX = taoXAxis(
-    shipAngle.thetaX,
-    shipAngularVelocity.x,
-    shipMass,
-    shipLength,
-    shipDepth,
-    shipWidth,
-    windAngle,
-    windVelocity,
-    currentAngle,
-    currentVelocity
+  // const ThetaX = taoXAxis(
+  //   ship.angles.thetaX,
+  //   ship.angularVelocity.x,
+  //   shipController,
+  //   windController,
+  //   currentController
+  // );
+  const {
+    angularAccelerationY,
+    visResTaoY,
+    thrForceY,
+    airResY,
+    currForceY,
+  } = taoYAxis(
+    shipController.angleY,
+    ship.angularVelocity.y,
+    shipController,
+    windController,
+    currentController,
+    engineController,
+    fuelController,
+    rho
   );
-  const ThetaY = taoYAxis(
-    shipAngle.thetaY,
-    shipAngularVelocity.y,
-    shipMass,
-    shipLength,
-    shipDepth,
-    shipWidth,
-    windAngle,
-    windVelocity,
-    currentAngle,
-    currentVelocity
-  );
-  const ThetaZ = taoZAxis(
-    shipAngle.thetaZ,
-    shipAngularVelocity.z,
-    shipMass,
-    shipLength,
-    shipDepth,
-    shipWidth,
-    windAngle,
-    windVelocity,
-    currentAngle,
-    currentVelocity
-  );
-  return { ThetaX, ThetaY, ThetaZ };
+  // const ThetaZ = taoZAxis(
+  //   ship.angles.thetaZ,
+  //   ship.angularVelocity.z,
+  //   shipController,
+  //   windController,
+  //   currentController
+  // );
+  return {
+    angularAccelerationY,
+    visResTaoY,
+    thrForceY,
+    airResY,
+    currForceY,
+  };
 };
 
 export { forces, rotations };

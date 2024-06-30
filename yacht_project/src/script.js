@@ -26,8 +26,8 @@ import {
 import { addShipControlsTo, shipController } from "./controls/ship_controls";
 import { addFuelControlsTo, fuelController } from "./controls/fuel_controls";
 import { waveController } from "./controls/wave_controls";
-import { forces } from "./functions";
-import './statistics.js';
+import { forces, rotations } from "./functions";
+import "./statistics.js";
 /**
  * Base
  */
@@ -54,21 +54,37 @@ export const ship = {
     z: 0,
   },
   thrustForce: 0,
+  thrustForceTao: 0,
   visRes: {
     x: 0,
     y: 0,
-    z: 0
+    z: 0,
   },
   airRes: {
     x: 0,
-    z: 0
+    z: 0,
   },
   currForce: {
     x: 0,
-    z: 0
+    z: 0,
+  },
+  visResTao: {
+    x: 0,
+    y: 0,
+    z: 0,
+  },
+  airResTao: {
+    x: 0,
+    y: 0,
+    z: 0,
+  },
+  currForceTao: {
+    x: 0,
+    y: 0,
+    z: 0,
   },
   weight: 0,
-  bouyanceForce: 0
+  bouyanceForce: 0,
 };
 
 // Debug
@@ -301,9 +317,13 @@ const tick = () => {
   if (yachtModel) {
     move(deltaTime);
     // Update yacht model position based on wave elevation
-    yachtModel.position.y = 12.5 +
+    yachtModel.position.y =
+      12.5 +
       calculateOfElevation(elapsedTime, waveController, yachtModel.position);
 
+    yachtModel.rotation.y = ship.angles.thetaY;
+    yachtModel.rotation.x = ship.angles.thetaX;
+    yachtModel.rotation.z = ship.angles.thetaZ;
     yachtModel.position.z = ship.position.z;
     yachtModel.position.x = ship.position.x;
     yachtModel.position.y += ship.position.y;
@@ -314,8 +334,10 @@ const tick = () => {
 
   camera.getWorldDirection(dir);
   sph.setFromVector3(dir);
-  const compass = document.getElementById('compassContainer')
-  compass.style.transform = `rotate(${THREE.Math.radToDeg(sph.theta) - 180}deg)`;
+  const compass = document.getElementById("compassContainer");
+  compass.style.transform = `rotate(${
+    THREE.Math.radToDeg(sph.theta) - 180
+  }deg)`;
   // Render
   renderer.render(scene, camera);
   // Call tick again on the next frame
@@ -339,9 +361,20 @@ const tick = () => {
 tick();
 
 function move(deltaTime) {
-  const { accelerateZ, thrust, visResZ, airResZ, currForceZ,
-    accelerateY, wghForce, bouyanceForce, visResY,
-    accelerateX, airResX, currForceX, visResX
+  const {
+    accelerateZ,
+    thrust,
+    visResZ,
+    airResZ,
+    currForceZ,
+    accelerateY,
+    wghForce,
+    bouyanceForce,
+    visResY,
+    accelerateX,
+    airResX,
+    currForceX,
+    visResX,
   } = forces(
     ship.velocity,
     shipController,
@@ -349,8 +382,18 @@ function move(deltaTime) {
     currentController,
     engineController,
     fuelController,
-    constantsController,
+    constantsController
   );
+  const { angularAccelerationY, visResTaoY, thrForceY, airResY, currForceY } =
+    rotations(
+      ship,
+      shipController,
+      windController,
+      currentController,
+      engineController,
+      fuelController,
+      constantsController.waterDensity
+    );
   // Z
   ship.thrustForce = thrust;
   ship.visRes.z = visResZ;
@@ -358,24 +401,29 @@ function move(deltaTime) {
   ship.currForce.z = currForceZ;
 
   // const maxSpeed = ((9.81 * shipController.shipLength) ** (1 / 2)) * 0.4
-  ship.velocity.z += (accelerateZ * deltaTime)
+  ship.velocity.z += accelerateZ * deltaTime;
   // ship.velocity.z = Math.min(ship.velocity.z, maxSpeed)
-  ship.position.z += (ship.velocity.z * deltaTime);
+  ship.position.z += ship.velocity.z * deltaTime;
 
   // Y
   ship.visRes.y = visResY;
-  ship.weight = wghForce;
-  ship.bouyanceForce = bouyanceForce;
-
-  ship.velocity.y += (accelerateY * deltaTime)
-  ship.position.y += (ship.velocity.y * deltaTime)
+  ship.velocity.y += accelerateY * deltaTime;
+  ship.position.y += ship.velocity.y * deltaTime;
 
   // X
   ship.thrustForce = thrust;
-  ship.visRes.x = visResX;
-  ship.airRes.x = airResX;
-  ship.currForce.x = currForceX;
+  ship.visRes.x += visResX;
+  ship.airRes.x += airResX;
+  ship.currForce.x += currForceX;
 
-  ship.velocity.x += (accelerateX * deltaTime)
-  ship.position.x += (ship.velocity.x * deltaTime)
+  ship.velocity.x += accelerateX * deltaTime;
+  ship.position.x += ship.velocity.x * deltaTime;
+
+  // Tao Y
+  ship.angularVelocity.y += angularAccelerationY * deltaTime;
+  ship.angles.thetaY += ship.angularVelocity.y * deltaTime;
+  ship.visResTao.y = visResTaoY;
+  ship.airResTao.y = airResY;
+  ship.currForceTao.y = currForceY;
+  ship.thrustForceTao = thrForceY;
 }
