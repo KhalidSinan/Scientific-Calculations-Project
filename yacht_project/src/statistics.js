@@ -90,5 +90,10 @@ setInterval(() => {
   <h4>Weight: ${ship.weight} </h4>
   <h4>Bouyancy: ${ship.bouyanceForce} </h4>
   <br>
+  <h3>Rotations:</h3>
+  <h4>Thrust Force: ${ship.thrustForceTao}</h4>
+  <h4>Air Res Y-Axis: ${ship.airResTao.y}</h4>
+  <h4>Current Force Y-Axis: ${ship.currForceTao.y}</h4>
+  <h4>Viscous Resistance Y-Axis: ${ship.visResTao.y}</h4>
   `;
 }, 300);
