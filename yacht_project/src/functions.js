@@ -467,10 +467,7 @@ const forcesYAxis = (
   const visResSign = shipVelocityY > 0 ? -1 : 1;
   visRes = visResSign * visRes
 
-<<<<<<< Updated upstream
-=======
   // Maybe dont need to add visRes
->>>>>>> Stashed changes
   let accelerate = (-wghForce + bouyanceForce + visRes) / shipMass;
   return {
     accelerateY: accelerate,
@@ -739,5 +736,4 @@ const rotations = (
     currForceY,
   };
 };
-
 export { forces, rotations };
