@@ -86,6 +86,46 @@ export const ship = {
   weight: 0,
   bouyanceForce: 0,
 };
+const keys = {
+  W: false,
+  A: false,
+  S: false,
+  D: false,
+  ARROWDOWN:false,
+  ARROWUP:false,
+  ARROWDOWN:false,
+  ARROWUP: false
+};
+document.addEventListener('keydown', event => {
+  
+  keys[event.key.toUpperCase()] = true;
+});
+document.addEventListener('keyup', event => {
+  keys[event.key.toUpperCase()] = false;
+});
+function updateKeyBoard() {
+  if (keys['W']) {
+    engineController.Vin +=0.01;
+  }
+  if (keys['A']) {
+    if (shipController.angleY<=30) {
+      shipController.angleY +=0.01;
+    }
+  }
+  if (keys['S']) {
+    if (engineController.Vin>0) {
+      
+      engineController.Vin -=0.01;
+    }
+  }
+  if (keys['D']) {
+ 
+    if (shipController.angleY >=-30) {
+      shipController.angleY -=0.01;
+    }
+   
+  }
+}
 
 // Debug
 const gui = new dat.GUI({ width: 340 });
@@ -217,8 +257,7 @@ camera.position.set(1, 40, 20);
 scene.add(camera);
 
 // Controls
-const controls = new OrbitControls(camera, canvas);
-controls.enableDamping = true; //enables a damping effect on the controls. This means that when the user stops interacting with the controls, they will continue to move for a short period of time before coming to a gradual stop. This can make the control movements feel smoother and more natural, rather than abruptly stopping when the user releases the input.
+ //enables a damping effect on the controls. This means that when the user stops interacting with the controls, they will continue to move for a short period of time before coming to a gradual stop. This can make the control movements feel smoother and more natural, rather than abruptly stopping when the user releases the input.
 /**
  * Renderer
  */
@@ -248,7 +287,8 @@ const effectController = {
   azimuth: 180,
   exposure: renderer.toneMappingExposure,
 };
-
+// const controls = new OrbitControls(camera, renderer.domElement);
+// controls.enableDamping = true;
 function guiChanged() {
   // This code defines a function called guiChanged() that is used to update the sky and water materials
   // in a three.js scene based on the values of certain parameters controlled by a GUI (graphical user interface).
@@ -296,7 +336,7 @@ guiChanged();
  * Animate
  */
 const clock = new THREE.Clock();
-
+// const controlsOrbit = new THREE.OrbitControls(camera, renderer.domElement);
 function init() {
   Object.keys(waveController).forEach((controller) => {
     water.material.uniforms[controller] = waveController[controller];
@@ -307,10 +347,12 @@ let prevTime = 0;
 var dir = new THREE.Vector3();
 var sph = new THREE.Spherical();
 
+// let camera_y_rotation = 0;
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
   const deltaTime = elapsedTime - prevTime;
   prevTime = elapsedTime;
+  updateKeyBoard()
 
   // Water
   water.material.uniforms["time"].value = elapsedTime;
@@ -327,17 +369,25 @@ const tick = () => {
     yachtModel.position.z = ship.position.z;
     yachtModel.position.x = ship.position.x;
     yachtModel.position.y += ship.position.y;
+
+
+    const cameraDistance = 50;
+    const cameraHeight = 30;
+    const cameraRotation = (-Math.PI / 2) - yachtModel.rotation.y;
+    const x = yachtModel.position.x + cameraDistance * Math.cos(cameraRotation);
+    const y = yachtModel.position.y + cameraHeight;
+    const z = yachtModel.position.z + cameraDistance * Math.sin(cameraRotation);
+    camera.position.set(x, y, z);
+    camera.lookAt(yachtModel.position);
   }
 
   // Update controls
-  controls.update();
+  // controls.update();
 
   camera.getWorldDirection(dir);
   sph.setFromVector3(dir);
-  const compass = document.getElementById("compassContainer");
-  compass.style.transform = `rotate(${
-    THREE.Math.radToDeg(sph.theta) - 180
-  }deg)`;
+  const compass = document.getElementById('compassContainer')
+  compass.style.transform = `rotate(${THREE.Math.radToDeg(sph.theta) - 180}deg)`;
   // Render
   renderer.render(scene, camera);
   // Call tick again on the next frame
@@ -356,7 +406,9 @@ const tick = () => {
   // Finally, it calls window.requestAnimationFrame(tick) to schedule the next call to the tick function on the next frame render, creating a loop for continuous updating of the scene.
 
   // Overall, this code controls the animation and interaction in a three.js scene, updating the water, yacht model position, controls, and rendering the scene on each frame.
-};
+
+}
+
 
 tick();
 
