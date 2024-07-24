@@ -446,6 +446,11 @@ function move(deltaTime) {
       fuelController,
       constantsController.waterDensity
     );
+
+  if (!(ship.position instanceof THREE.Vector3)) {
+    ship.position = new THREE.Vector3(ship.position.x || 0, ship.position.y || 0, ship.position.z || 0);
+  }
+
   // to make it move forward based on its direction
   const direction = new THREE.Vector3(0, 0, 1)
   direction.applyQuaternion(new THREE.Quaternion().setFromEuler(new THREE.Euler(ship.angles.thetaX, ship.angles.thetaY, ship.angles.thetaZ)));
@@ -457,7 +462,8 @@ function move(deltaTime) {
   ship.currForce.z = currForceZ;
 
   ship.velocity.z += accelerateZ * deltaTime;
-  ship.position.z += direction.z * ship.velocity.z * deltaTime;
+  ship.position.addScaledVector(direction, ship.velocity.z * deltaTime);
+  // ship.position.z += direction.z * ship.velocity.z * deltaTime;
 
   // Y
   ship.visRes.y = visResY;
@@ -471,7 +477,7 @@ function move(deltaTime) {
   ship.currForce.x += currForceX;
 
   ship.velocity.x += accelerateX * deltaTime;
-  ship.position.x += direction.x * ship.velocity.x * deltaTime;
+  ship.position.x += ship.velocity.x * deltaTime;
 
   // Tao Y
   const angularDamping = 0.99; // to make the rotation stop
@@ -484,3 +490,30 @@ function move(deltaTime) {
   ship.currForceTao.y = currForceY;
   ship.thrustForceTao = thrForceY;
 }
+
+function addCubesOnWater(numCubes, waterLevel) {
+  const geometry = new THREE.BoxGeometry(5, 5, 5); // Size of the cubes
+  const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 }); // Color of the cubes
+
+  for (let i = 0; i < numCubes; i++) {
+    // Create a cube
+    const cube = new THREE.Mesh(geometry, material);
+
+    // Randomize position
+    const x = Math.random() * 2048 - 1024; // Adjust range as needed
+    const z = Math.random() * 2048 - 1024; // Adjust range as needed
+
+    // Position the cube
+    cube.position.set(x, waterLevel, z);
+
+    // Optionally add some rotation
+    cube.rotation.x = Math.random() * Math.PI;
+    cube.rotation.y = Math.random() * Math.PI;
+
+    // Add the cube to the scene
+    scene.add(cube);
+  }
+}
+
+// Call this after adding the water
+addCubesOnWater(1000, water.position.y); // Add 50 cubes on the water surface
