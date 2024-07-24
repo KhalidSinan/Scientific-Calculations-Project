@@ -91,13 +91,13 @@ const keys = {
   A: false,
   S: false,
   D: false,
-  ARROWDOWN:false,
-  ARROWUP:false,
-  ARROWDOWN:false,
+  ARROWDOWN: false,
+  ARROWUP: false,
+  ARROWDOWN: false,
   ARROWUP: false
 };
 document.addEventListener('keydown', event => {
-  
+
   keys[event.key.toUpperCase()] = true;
 });
 document.addEventListener('keyup', event => {
@@ -105,25 +105,25 @@ document.addEventListener('keyup', event => {
 });
 function updateKeyBoard() {
   if (keys['W']) {
-    engineController.Vin +=0.01;
+    engineController.Vin += 0.01;
   }
   if (keys['A']) {
-    if (shipController.angleY<=30) {
-      shipController.angleY +=0.01;
+    if (shipController.angleY <= 30) {
+      shipController.angleY += 0.01;
     }
   }
   if (keys['S']) {
-    if (engineController.Vin>0) {
-      
-      engineController.Vin -=0.01;
+    if (engineController.Vin > 0) {
+
+      engineController.Vin -= 0.01;
     }
   }
   if (keys['D']) {
- 
-    if (shipController.angleY >=-30) {
-      shipController.angleY -=0.01;
+
+    if (shipController.angleY >= -30) {
+      shipController.angleY -= 0.01;
     }
-   
+
   }
 }
 
@@ -257,7 +257,7 @@ camera.position.set(1, 40, 20);
 scene.add(camera);
 
 // Controls
- //enables a damping effect on the controls. This means that when the user stops interacting with the controls, they will continue to move for a short period of time before coming to a gradual stop. This can make the control movements feel smoother and more natural, rather than abruptly stopping when the user releases the input.
+//enables a damping effect on the controls. This means that when the user stops interacting with the controls, they will continue to move for a short period of time before coming to a gradual stop. This can make the control movements feel smoother and more natural, rather than abruptly stopping when the user releases the input.
 /**
  * Renderer
  */
@@ -446,16 +446,18 @@ function move(deltaTime) {
       fuelController,
       constantsController.waterDensity
     );
+  // to make it move forward based on its direction
+  const direction = new THREE.Vector3(0, 0, 1)
+  direction.applyQuaternion(new THREE.Quaternion().setFromEuler(new THREE.Euler(ship.angles.thetaX, ship.angles.thetaY, ship.angles.thetaZ)));
+
   // Z
   ship.thrustForce = thrust;
   ship.visRes.z = visResZ;
   ship.airRes.z = airResZ;
   ship.currForce.z = currForceZ;
 
-  // const maxSpeed = ((9.81 * shipController.shipLength) ** (1 / 2)) * 0.4
   ship.velocity.z += accelerateZ * deltaTime;
-  // ship.velocity.z = Math.min(ship.velocity.z, maxSpeed)
-  ship.position.z += ship.velocity.z * deltaTime;
+  ship.position.z += direction.z * ship.velocity.z * deltaTime;
 
   // Y
   ship.visRes.y = visResY;
@@ -469,9 +471,12 @@ function move(deltaTime) {
   ship.currForce.x += currForceX;
 
   ship.velocity.x += accelerateX * deltaTime;
-  ship.position.x += ship.velocity.x * deltaTime;
+  ship.position.x += direction.x * ship.velocity.x * deltaTime;
 
   // Tao Y
+  const angularDamping = 0.99; // to make the rotation stop
+  ship.angularVelocity.y *= angularDamping;
+
   ship.angularVelocity.y += angularAccelerationY * deltaTime;
   ship.angles.thetaY += ship.angularVelocity.y * deltaTime;
   ship.visResTao.y = visResTaoY;

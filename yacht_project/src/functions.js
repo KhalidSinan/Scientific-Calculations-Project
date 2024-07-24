@@ -592,7 +592,6 @@ const taoYAxis = (
   const IdeltaY = inertiaY(shipController);
   const angularAccelerationY =
     (wghForce + bouyanceForce + visRes + airResY + currForceY + thrForce) / IdeltaY;
-  console.log(angularAccelerationY);
   // const angularVelocityY2 = angularVelocityY1 + angularAccelerationY;
   // const thetaY2 = thetaY1 + angularVelocityY2;
   return {
