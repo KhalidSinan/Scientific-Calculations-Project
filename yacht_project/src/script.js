@@ -28,6 +28,7 @@ import { addFuelControlsTo, fuelController } from "./controls/fuel_controls";
 import { waveController } from "./controls/wave_controls";
 import { forces, rotations } from "./functions";
 import "./statistics.js";
+import { createBoundingBoxForYacht, checkCollisions } from "./collision.js";
 /**
  * Base
  */
@@ -160,6 +161,7 @@ gltfLoader.load("/models/yacht/scene.gltf", (gltf) => {
   gltf.scene.translateY(1.125);
   yachtModel = gltf.scene;
   camera.lookAt(yachtModel.position);
+  createBoundingBoxForYacht(scene, yachtModel)
   scene.add(yachtModel);
 });
 
@@ -331,7 +333,6 @@ sunFolder.add(effectController, "azimuth", -180, 180, 0.1).onChange(guiChanged);
 sunFolder.add(effectController, "exposure", 0, 1, 0.0001).onChange(guiChanged);
 
 guiChanged();
-
 /**
  * Animate
  */
@@ -347,7 +348,7 @@ let prevTime = 0;
 var dir = new THREE.Vector3();
 var sph = new THREE.Spherical();
 
-// let camera_y_rotation = 0;
+let intersects = false
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
   const deltaTime = elapsedTime - prevTime;
@@ -358,18 +359,21 @@ const tick = () => {
   water.material.uniforms["time"].value = elapsedTime;
   if (yachtModel) {
     move(deltaTime);
+    intersects = checkCollisions(scene, yachtModel);
+
     // Update yacht model position based on wave elevation
     yachtModel.position.y =
       12.5 +
       calculateOfElevation(elapsedTime, waveController, yachtModel.position);
 
+    if (!intersects) {
+      yachtModel.rotation.x = ship.angles.thetaX;
+      yachtModel.rotation.z = ship.angles.thetaZ;
+      yachtModel.position.z = ship.position.z;
+      yachtModel.position.x = ship.position.x;
+    }
     yachtModel.rotation.y = ship.angles.thetaY;
-    yachtModel.rotation.x = ship.angles.thetaX;
-    yachtModel.rotation.z = ship.angles.thetaZ;
-    yachtModel.position.z = ship.position.z;
-    yachtModel.position.x = ship.position.x;
     yachtModel.position.y += ship.position.y;
-
 
     const cameraDistance = 50;
     const cameraHeight = 30;
@@ -380,9 +384,6 @@ const tick = () => {
     camera.position.set(x, y, z);
     camera.lookAt(yachtModel.position);
   }
-
-  // Update controls
-  // controls.update();
 
   camera.getWorldDirection(dir);
   sph.setFromVector3(dir);
@@ -457,12 +458,14 @@ function move(deltaTime) {
 
   // Z
   ship.thrustForce = thrust;
-  ship.visRes.z = visResZ;
-  ship.airRes.z = airResZ;
-  ship.currForce.z = currForceZ;
+  if (!intersects) {
+    ship.visRes.z = visResZ;
+    ship.airRes.z = airResZ;
+    ship.currForce.z = currForceZ;
 
-  ship.velocity.z += accelerateZ * deltaTime;
-  ship.position.addScaledVector(direction, ship.velocity.z * deltaTime);
+    ship.velocity.z += accelerateZ * deltaTime;
+    ship.position.addScaledVector(direction, ship.velocity.z * deltaTime);
+  }
   // ship.position.z += direction.z * ship.velocity.z * deltaTime;
 
   // Y
@@ -491,12 +494,16 @@ function move(deltaTime) {
   ship.thrustForceTao = thrForceY;
 }
 
+
+// For Testing Collision
+
+// Function to create bounding boxes for the cubes
 function addCubesOnWater(numCubes, waterLevel) {
-  const geometry = new THREE.BoxGeometry(5, 5, 5); // Size of the cubes
-  const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 }); // Color of the cubes
+  const geometry = new THREE.BoxGeometry(10, 10, 10); // Size of the cubes
 
   for (let i = 0; i < numCubes; i++) {
     // Create a cube
+    const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 }); // Color of the cubes
     const cube = new THREE.Mesh(geometry, material);
 
     // Randomize position
@@ -506,14 +513,12 @@ function addCubesOnWater(numCubes, waterLevel) {
     // Position the cube
     cube.position.set(x, waterLevel, z);
 
-    // Optionally add some rotation
-    cube.rotation.x = Math.random() * Math.PI;
-    cube.rotation.y = Math.random() * Math.PI;
-
     // Add the cube to the scene
     scene.add(cube);
+
+    // Add bounding box to the cube
+    cube.boundingBox = new THREE.Box3().setFromObject(cube);
   }
 }
 
-// Call this after adding the water
-addCubesOnWater(1000, water.position.y); // Add 50 cubes on the water surface
+addCubesOnWater(500, water.position.y);
