@@ -29,6 +29,7 @@ import { waveController } from "./controls/wave_controls";
 import { forces, rotations } from "./functions";
 import "./statistics.js";
 import { createBoundingBoxForYacht, checkCollisions } from "./collision.js";
+import { checkMovingYacht, initSoundSystem } from "./sounds.js";
 /**
  * Base
  */
@@ -258,6 +259,8 @@ const camera = new THREE.PerspectiveCamera(
 camera.position.set(1, 40, 20);
 scene.add(camera);
 
+initSoundSystem(camera)
+
 // Controls
 //enables a damping effect on the controls. This means that when the user stops interacting with the controls, they will continue to move for a short period of time before coming to a gradual stop. This can make the control movements feel smoother and more natural, rather than abruptly stopping when the user releases the input.
 /**
@@ -374,6 +377,8 @@ const tick = () => {
     }
     yachtModel.rotation.y = ship.angles.thetaY;
     yachtModel.position.y += ship.position.y;
+
+    checkMovingYacht(ship.velocity.z)
 
     const cameraDistance = 50;
     const cameraHeight = 30;
