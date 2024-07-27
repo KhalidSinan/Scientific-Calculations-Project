@@ -1,2 +1,4 @@
 node_modules/
 static/models
+static/sounds/oceanSound.mp3
+static/sounds/yachtMovingSound.mp3
