@@ -166,6 +166,14 @@ gltfLoader.load("/models/yacht/scene.gltf", (gltf) => {
   scene.add(yachtModel);
 });
 
+let islandModel;
+gltfLoader.load("/models/island/scene.gltf", (gltf) => {
+  gltf.scene.scale.set(50, 50, 50);
+  gltf.scene.translateZ(1000);
+  islandModel = gltf.scene;
+  scene.add(islandModel);
+});
+
 // Lights
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
 scene.add(ambientLight);
