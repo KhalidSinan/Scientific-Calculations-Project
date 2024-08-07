@@ -580,12 +580,14 @@ const taoYAxis = (
     shipController.shipWidth / 2
   );
   const airResY = tao(
-    windX(windController.angle, windController.velocity),
-    shipController.shipWidth / 2
+    windZ(windController.angle, windController.velocity),
+    shipController.shipWidth / 2,
+    windController.angle
   );
   const currForceY = tao(
-    currentX(currentController.angle, currentController.velocity),
-    shipController.shipWidth / 2
+    currentZ(currentController.angle, currentController.velocity),
+    shipController.shipWidth / 2,
+    currentController.angle
   );
   const visResSign = shipAngularVelocityY1 > 0 ? -1 : 1;
   visRes = visResSign * visRes;
