@@ -500,6 +500,10 @@ const inertiaZ = (shipMass, shipWidth, shipDepth) => {
   return (1 / 12) * shipMass * (shipWidth * shipWidth + shipDepth * shipDepth);
 };
 
+const calculateTorqueOfViscousResistance = (rho, angularVelocity, shipLength, shipWidth, shipMass) => {
+  return 1 / 8 * rho * wettedSurfaceArea(shipMass, shipWidth, shipLength, rho) * angularVelocity ** 2 * Cf * Math.pow(shipLength, 4)
+}
+
 // دراسة الحركة الدورانية على محور السينات
 const taoXAxis = (
   thetaX1,
@@ -569,16 +573,7 @@ const taoYAxis = (
     ),
     0
   );
-  let visRes = tao(
-    viscousResistance(
-      shipAngularVelocityY1,
-      shipController.shipMass,
-      shipController.shipWidth,
-      shipController.shipLength,
-      rho
-    ),
-    shipController.shipWidth / 2
-  );
+  let visResTorque = calculateTorqueOfViscousResistance(rho, shipAngularVelocityY1, shipController.shipLength, shipController.shipWidth, shipController.shipMass)
   const airResY = tao(
     windZ(windController.angle, windController.velocity),
     shipController.shipWidth / 2,
@@ -590,16 +585,14 @@ const taoYAxis = (
     currentController.angle
   );
   const visResSign = shipAngularVelocityY1 > 0 ? -1 : 1;
-  visRes = visResSign * visRes;
+  visResTorque = visResSign * visResTorque;
   const IdeltaY = inertiaY(shipController);
   const angularAccelerationY =
-    (wghForce + bouyanceForce + visRes + airResY + currForceY + thrForce) / IdeltaY;
-  // const angularVelocityY2 = angularVelocityY1 + angularAccelerationY;
-  // const thetaY2 = thetaY1 + angularVelocityY2;
+    (wghForce + bouyanceForce + visResTorque + airResY + currForceY + thrForce) / IdeltaY;
   return {
     angularAccelerationY,
     thrForceY: thrForce,
-    visResTaoY: visRes,
+    visResTaoY: visResTorque,
     airResY,
     currForceY,
   };
