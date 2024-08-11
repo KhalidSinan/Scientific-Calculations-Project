@@ -168,7 +168,7 @@ gltfLoader.load("/models/yacht/scene.gltf", (gltf) => {
 
 let islandModel;
 gltfLoader.load("/models/island/scene.gltf", (gltf) => {
-  gltf.scene.scale.set(50, 50, 50);
+  gltf.scene.scale.set(100, 100, 100);
   gltf.scene.translateZ(1000);
   islandModel = gltf.scene;
   scene.add(islandModel);
@@ -496,9 +496,6 @@ function move(deltaTime) {
   ship.position.x += ship.velocity.x * deltaTime;
 
   // Tao Y
-  const angularDamping = 0.99; // to make the rotation stop
-  ship.angularVelocity.y *= angularDamping;
-
   ship.angularVelocity.y += angularAccelerationY * deltaTime;
   ship.angles.thetaY += ship.angularVelocity.y * deltaTime;
   ship.visResTao.y = visResTaoY;
