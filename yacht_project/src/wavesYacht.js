@@ -101,6 +101,10 @@ function calculateOfElevation(uTime, waveController, yachtPosition) {
         elevation -= Math.abs(cnoise([yachtPosition.x * waveController.uSmallWavesFrequency.value * i, yachtPosition.z * waveController.uSmallWavesFrequency.value * i, uTime * waveController.uSmallWavesSpeed.value])) * waveController.uSmallWavesElevation.value / i;
     }
     return elevation;
+    // This function calculates the wave elevation at a given position (x, z) based on the specified parameters related to big and small waves.
+    // It retrieves the values of wave elevation, frequency, speed, and iterations from the water material uniforms, 
+    //and then calls the calculateOfElevation function with these values along with the current time and the x, z position. 
+    //The calculateOfElevation function likely performs calculations to determine the wave elevation at the specified position based on the given parameters.
 }
 
 module.exports = calculateOfElevation

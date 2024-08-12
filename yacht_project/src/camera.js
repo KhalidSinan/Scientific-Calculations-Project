@@ -7,10 +7,10 @@ let controls; // OrbitControls instance
 
 function initializeCamera(sizes, scene) {
     camera = new THREE.PerspectiveCamera(
-        75, //represents the vertical field of view in degrees. This essentially determines how much of the scene is visible through the camera lens.
+        75,//represents the vertical field of view in degrees. This essentially determines how much of the scene is visible through the camera lens.
         sizes.width / sizes.height,
-        0.1,
-        5000
+        0.1,//specifies the distance from the camera where objects will start to be rendered. Anything closer to the camera than this distance will not be visible.
+        5000//specifies the distance from the camera where objects will stop being rendered. Anything further away from the camera than this distance will not be visible.
     );
     camera.position.set(1, 40, 20);
     scene.add(camera)
@@ -26,11 +26,10 @@ function toggleFreeCamera() {
     }
 }
 
-
 // Initialize OrbitControls for free camera movement
 function setupOrbitControls(renderer) {
     controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true; // Smooth movement
+    controls.enableDamping = true; //enables a damping effect on the controls. This means that when the user stops interacting with the controls, they will continue to move for a short period of time before coming to a gradual stop. This can make the control movements feel smoother and more natural, rather than abruptly stopping when the user releases the input.
 }
 
 function updateCamera(yachtModel) {

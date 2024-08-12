@@ -1,7 +1,7 @@
 // Model
 import * as THREE from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"; //which is a loader specifically designed for loading 3D models in the GLTF format.
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js"; // The DRACOLoader helps to reduce file size and improve rendering performance by compressing and decompressing geometry data.
 import { createBoundingBoxForYacht } from "./collision.js";
 
 const dracoLoader = new DRACOLoader(); //This instance can be used to load and decode Draco compressed 3D geometry data in Three.js.

@@ -1,11 +1,11 @@
 import "./style.css";
 import * as THREE from "three";
-import * as dat from 'lil-gui'
+import * as dat from "lil-gui"; //dat.GUI can be used to add controls such as sliders, buttons, and checkboxes to manipulate properties and settings of a Three.js scene.
 import waterVertexShader from "./shaders/water/vertex.glsl";
 import waterFragmentShader from "./shaders/water/fragment.glsl";
 import { Sky } from "three/examples/jsm/objects/Sky.js";
 import { Water } from "three/examples/jsm/objects/Water.js";
-import calculateOfElevation from "./wavesYacht";
+import calculateOfElevation from "./wavesYacht"; //This function is likely used to calculate the elevation of waves for a yacht in a 3D scene.
 import { addEngineControlsTo, engineController } from "./controls/engine_controls";
 import { addConstantsControlsTo, constantsController } from "./controls/constants_controls";
 import { addWindControlsTo, windController } from "./controls/wind_controls";
@@ -21,6 +21,7 @@ import { addAllModels, yachtModel } from "./models.js";
 import { updateKeyBoard } from "./keyboard.js";
 import { addLights } from "./lights.js";
 import { camera, initializeCamera, setupOrbitControls, toggleFreeCamera, updateCamera } from "./camera.js";
+
 /**
  * Base
  */
@@ -117,12 +118,12 @@ const water = new Water(waterGeometry, {
     function (texture) {
       texture.wrapS = texture.wrapT = THREE.RepeatWrapping; //Repeat water texture
     }
-  ),
-  sunDirection: new THREE.Vector3(),
-  sunColor: 0xffffff,
-  waterColor: 0x001e0f,
-  distortionScale: 3.7,
-  fog: scene.fog !== undefined,
+  ), //This is a texture used for water normals that is loaded from the "/waternormals.jpg" file. The texture is set to repeat wrapping.
+  sunDirection: new THREE.Vector3(), // The direction of the sun for lighting the water.
+  sunColor: 0xffffff, // The color of the sun for lighting the water.
+  waterColor: 0x001e0f, //The color of the water.
+  distortionScale: 3.7, //The scale of distortion applied to the water.
+  fog: scene.fog !== undefined, // Whether fog is enabled in the scene.
   vertexShader: waterVertexShader,
   fragmentShader: waterFragmentShader,
   side: THREE.DoubleSide,
