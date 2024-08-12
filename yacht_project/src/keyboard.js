@@ -1,12 +1,10 @@
+import { toggleFreeCamera } from "./camera";
+
 const keys = {
     W: false,
     A: false,
     S: false,
     D: false,
-    ARROWDOWN: false,
-    ARROWUP: false,
-    ARROWDOWN: false,
-    ARROWUP: false,
     F: false
 };
 
@@ -38,7 +36,7 @@ function updateKeyBoard(shipController, engineController) {
         }
     }
     if (keys['F']) {
-        // toggleFreeCamera();
+        toggleFreeCamera()
     }
 }
 

@@ -539,16 +539,7 @@ const taoXAxis = (
 };
 
 // دراسة الحركة الدورانية على محور الصادات
-const taoYAxis = (
-  thetaY1,
-  shipAngularVelocityY1,
-  shipController,
-  windController,
-  currentController,
-  engineController,
-  fuelController,
-  rho
-) => {
+const taoYAxis = (thetaY1, shipAngularVelocityY1, shipController, windController, currentController, engineController, fuelController, rho) => {
   const wghForce = tao(shipWeight(shipController.shipMass), 0);
   const thrForce = tao(
     thrustForce(
