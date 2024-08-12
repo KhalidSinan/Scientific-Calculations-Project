@@ -26,16 +26,15 @@ function checkCollisions(scene, yachtModel) {
         // loop across all objects
         // check if it isMesh and it is BoxGeometry and if it has a bounding box
         scene.traverse((object) => {
-            if (object.isMesh && object !== yachtModel && object.boundingBox) {
+            if (object !== yachtModel && object.boundingBox) {
                 object.boundingBox.setFromObject(object);
                 // if the yacht intersects the bounding box 
                 // do something
                 // example: change color
                 if (yachtBoundingBox.intersectsBox(object.boundingBox)) {
                     intersects = true
-                    object.material.color.set(0xff0000);
                 } else {
-                    object.material.color.set(0x00ff00);
+                    intersects = false
                 }
             }
         });

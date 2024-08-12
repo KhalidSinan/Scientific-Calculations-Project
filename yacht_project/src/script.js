@@ -1,35 +1,26 @@
 import "./style.css";
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"; //OrbitControls is a helper library in Three.js that provides an easy-to-use way to control the camera in a 3D scene.
-import * as dat from "lil-gui"; //dat.GUI can be used to add controls such as sliders, buttons, and checkboxes to manipulate properties and settings of a Three.js scene.
+import * as dat from 'lil-gui'
 import waterVertexShader from "./shaders/water/vertex.glsl";
 import waterFragmentShader from "./shaders/water/fragment.glsl";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { Sky } from "three/examples/jsm/objects/Sky.js";
 import { Water } from "three/examples/jsm/objects/Water.js";
 import calculateOfElevation from "./wavesYacht";
-import {
-  addEngineControlsTo,
-  engineController,
-} from "./controls/engine_controls";
-import { addWaveControlsTo } from "./controls/wave_controls";
-import {
-  addConstantsControlsTo,
-  constantsController,
-} from "./controls/constants_controls";
+import { addEngineControlsTo, engineController } from "./controls/engine_controls";
+import { addConstantsControlsTo, constantsController } from "./controls/constants_controls";
 import { addWindControlsTo, windController } from "./controls/wind_controls";
-import {
-  addCurrentControlsTo,
-  currentController,
-} from "./controls/current_controls";
+import { addCurrentControlsTo, currentController } from "./controls/current_controls";
 import { addShipControlsTo, shipController } from "./controls/ship_controls";
 import { addFuelControlsTo, fuelController } from "./controls/fuel_controls";
-import { waveController } from "./controls/wave_controls";
+import { addWaveControlsTo, waveController } from "./controls/wave_controls";
 import { forces, rotations } from "./functions";
 import "./statistics.js";
-import { createBoundingBoxForYacht, checkCollisions } from "./collision.js";
+import { checkCollisions } from "./collision.js";
 import { checkMovingYacht, initSoundSystem } from "./sounds.js";
+import { addAllModels, yachtModel } from "./models.js";
+import { updateKeyBoard } from "./keyboard.js";
+import { addLights } from "./lights.js";
+import { camera, initializeCamera, setupOrbitControls, toggleFreeCamera, updateCamera } from "./camera.js";
 /**
  * Base
  */
@@ -88,56 +79,15 @@ export const ship = {
   weight: 0,
   bouyanceForce: 0,
 };
-const keys = {
-  W: false,
-  A: false,
-  S: false,
-  D: false,
-  ARROWDOWN: false,
-  ARROWUP: false,
-  ARROWDOWN: false,
-  ARROWUP: false
-};
-document.addEventListener('keydown', event => {
 
-  keys[event.key.toUpperCase()] = true;
-});
-document.addEventListener('keyup', event => {
-  keys[event.key.toUpperCase()] = false;
-});
-function updateKeyBoard() {
-  if (keys['W']) {
-    engineController.Vin += 0.01;
-  }
-  if (keys['A']) {
-    if (shipController.angleY <= 30) {
-      shipController.angleY += 0.01;
-    }
-  }
-  if (keys['S']) {
-    if (engineController.Vin > 0) {
-
-      engineController.Vin -= 0.01;
-    }
-  }
-  if (keys['D']) {
-
-    if (shipController.angleY >= -30) {
-      shipController.angleY -= 0.01;
-    }
-
-  }
-}
-
-// Debug
 const gui = new dat.GUI({ width: 340 });
-addEngineControlsTo(gui);
-addFuelControlsTo(gui);
-addWaveControlsTo(gui);
+addEngineControlsTo(gui)
+addWaveControlsTo(gui)
 addConstantsControlsTo(gui);
-addWindControlsTo(gui);
-addCurrentControlsTo(gui);
-addShipControlsTo(gui);
+addCurrentControlsTo(gui)
+addFuelControlsTo(gui)
+addWindControlsTo(gui)
+addShipControlsTo(gui)
 
 // Canvas
 const canvas = document.querySelector("canvas.webgl"); // is used to select the canvas element with the class name "webgl" and assign it to the variable canvas.
@@ -149,45 +99,8 @@ const canvas = document.querySelector("canvas.webgl"); // is used to select the 
 // Scene
 const scene = new THREE.Scene(); //This statement creates a new THREE.js scene, which is basically a container that holds all the objects, lights, cameras,
 
-// Model
-const dracoLoader = new DRACOLoader(); //This instance can be used to load and decode Draco compressed 3D geometry data in Three.js.
-dracoLoader.setDecoderPath("/draco/"); //The Draco loader is a JavaScript module used for loading and decoding Draco-compressed 3D models. By setting the decoder path to "/draco/", the loader will look for the decoder module in that directory when decoding Draco-compressed models.
-
-const gltfLoader = new GLTFLoader();
-gltfLoader.setDRACOLoader(dracoLoader);
-
-let yachtModel;
-gltfLoader.load("/models/yacht/scene.gltf", (gltf) => {
-  gltf.scene.scale.set(1, 1, 1);
-  gltf.scene.translateY(1.125);
-  yachtModel = gltf.scene;
-  camera.lookAt(yachtModel.position);
-  createBoundingBoxForYacht(scene, yachtModel)
-  scene.add(yachtModel);
-});
-
-let islandModel;
-gltfLoader.load("/models/island/scene.gltf", (gltf) => {
-  gltf.scene.scale.set(100, 100, 100);
-  gltf.scene.translateZ(1000);
-  islandModel = gltf.scene;
-  scene.add(islandModel);
-});
-
 // Lights
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-scene.add(ambientLight);
-
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
-directionalLight.castShadow = true;
-directionalLight.shadow.mapSize.set(1024, 1024);
-directionalLight.shadow.camera.far = 15;
-directionalLight.shadow.camera.left = -7;
-directionalLight.shadow.camera.top = 7;
-directionalLight.shadow.camera.right = 7;
-directionalLight.shadow.camera.bottom = -7;
-directionalLight.position.set(-5, 5, 0);
-scene.add(directionalLight);
+addLights(scene)
 
 /**
  * Water
@@ -258,19 +171,11 @@ window.addEventListener("resize", () => {
  * Camera
  */
 // Base camera
-const camera = new THREE.PerspectiveCamera(
-  75, //represents the vertical field of view in degrees. This essentially determines how much of the scene is visible through the camera lens.
-  sizes.width / sizes.height,
-  0.1,
-  5000
-);
-camera.position.set(1, 40, 20);
-scene.add(camera);
 
+initializeCamera(sizes, scene)
 initSoundSystem(camera)
 
-// Controls
-//enables a damping effect on the controls. This means that when the user stops interacting with the controls, they will continue to move for a short period of time before coming to a gradual stop. This can make the control movements feel smoother and more natural, rather than abruptly stopping when the user releases the input.
+
 /**
  * Renderer
  */
@@ -290,7 +195,6 @@ scene.add(sky);
 sun = new THREE.Vector3();
 
 /// GUI
-
 const effectController = {
   turbidity: 10,
   rayleigh: 3,
@@ -300,8 +204,6 @@ const effectController = {
   azimuth: 180,
   exposure: renderer.toneMappingExposure,
 };
-// const controls = new OrbitControls(camera, renderer.domElement);
-// controls.enableDamping = true;
 function guiChanged() {
   // This code defines a function called guiChanged() that is used to update the sky and water materials
   // in a three.js scene based on the values of certain parameters controlled by a GUI (graphical user interface).
@@ -347,8 +249,6 @@ guiChanged();
 /**
  * Animate
  */
-const clock = new THREE.Clock();
-// const controlsOrbit = new THREE.OrbitControls(camera, renderer.domElement);
 function init() {
   Object.keys(waveController).forEach((controller) => {
     water.material.uniforms[controller] = waveController[controller];
@@ -358,13 +258,24 @@ init();
 let prevTime = 0;
 var dir = new THREE.Vector3();
 var sph = new THREE.Spherical();
+addAllModels(scene, camera)
 
+setupOrbitControls(renderer);
+
+const cameraFolder = gui.addFolder("Camera");
+cameraFolder.add({ toggleFreeCamera }, 'toggleFreeCamera').name('Toggle Free Camera');
+cameraFolder.close();
+// Free Camera End--------------------------------------------------------------------------------------------------
+
+
+const clock = new THREE.Clock();
 let intersects = false
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
   const deltaTime = elapsedTime - prevTime;
   prevTime = elapsedTime;
-  updateKeyBoard()
+
+  updateKeyBoard(shipController, engineController)
 
   // Water
   water.material.uniforms["time"].value = elapsedTime;
@@ -388,14 +299,7 @@ const tick = () => {
 
     checkMovingYacht(ship.velocity.z)
 
-    const cameraDistance = 50;
-    const cameraHeight = 30;
-    const cameraRotation = (-Math.PI / 2) - yachtModel.rotation.y;
-    const x = yachtModel.position.x + cameraDistance * Math.cos(cameraRotation);
-    const y = yachtModel.position.y + cameraHeight;
-    const z = yachtModel.position.z + cameraDistance * Math.sin(cameraRotation);
-    camera.position.set(x, y, z);
-    camera.lookAt(yachtModel.position);
+    updateCamera(yachtModel)
   }
 
   camera.getWorldDirection(dir);
@@ -531,4 +435,4 @@ function addCubesOnWater(numCubes, waterLevel) {
   }
 }
 
-addCubesOnWater(500, water.position.y);
+// addCubesOnWater(500, water.position.y);
