@@ -82,11 +82,11 @@ export const ship = {
 
 const gui = new dat.GUI({ width: 340 });
 addEngineControlsTo(gui)
+addFuelControlsTo(gui)
 addWaveControlsTo(gui)
 addConstantsControlsTo(gui);
-addCurrentControlsTo(gui)
-addFuelControlsTo(gui)
 addWindControlsTo(gui)
+addCurrentControlsTo(gui)
 addShipControlsTo(gui)
 
 // Canvas
