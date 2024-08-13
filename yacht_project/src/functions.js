@@ -1,5 +1,3 @@
-import { constantsController } from "./controls/constants_controls";
-
 // تحويلات
 const kgm3Topoundft3 = (number) => {
   return number / 16.1084634;
@@ -577,6 +575,7 @@ const taoYAxis = (thetaY1, shipAngularVelocityY1, shipController, windController
   );
   const visResSign = shipAngularVelocityY1 > 0 ? -1 : 1;
   visResTorque = visResSign * visResTorque;
+  console.log(visResTorque)
   const IdeltaY = inertiaY(shipController);
   const angularAccelerationY =
     (wghForce + bouyanceForce + visResTorque + airResY + currForceY + thrForce) / IdeltaY;

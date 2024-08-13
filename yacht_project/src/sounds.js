@@ -1,10 +1,11 @@
 import * as THREE from "three";
+import { camera } from "./camera";
 
 const listener = new THREE.AudioListener();
 let oceanSound = new THREE.Audio(listener);
 let engineSound = new THREE.Audio(listener);
 
-function initSoundSystem(camera) {
+function initSoundSystem() {
     camera.add(listener)
     // to load sound files
     const audioLoader = new THREE.AudioLoader();
