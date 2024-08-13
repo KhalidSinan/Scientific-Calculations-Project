@@ -1,11 +1,12 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"; //OrbitControls is a helper library in Three.js that provides an easy-to-use way to control the camera in a 3D scene.
+import { renderer, scene } from "./sceneSetup";
 
 let camera
 let isFreeCameraEnabled = false
 let controls; // OrbitControls instance
 
-function initializeCamera(sizes, scene) {
+function initializeCamera(sizes) {
     camera = new THREE.PerspectiveCamera(
         75,//represents the vertical field of view in degrees. This essentially determines how much of the scene is visible through the camera lens.
         sizes.width / sizes.height,
@@ -14,6 +15,7 @@ function initializeCamera(sizes, scene) {
     );
     camera.position.set(1, 40, 20);
     scene.add(camera)
+    setupOrbitControls()
 }
 
 function toggleFreeCamera() {
@@ -27,7 +29,7 @@ function toggleFreeCamera() {
 }
 
 // Initialize OrbitControls for free camera movement
-function setupOrbitControls(renderer) {
+function setupOrbitControls() {
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true; //enables a damping effect on the controls. This means that when the user stops interacting with the controls, they will continue to move for a short period of time before coming to a gradual stop. This can make the control movements feel smoother and more natural, rather than abruptly stopping when the user releases the input.
 }

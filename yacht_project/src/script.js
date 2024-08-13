@@ -1,31 +1,27 @@
 import "./style.css";
 import * as THREE from "three";
-import * as dat from "lil-gui"; //dat.GUI can be used to add controls such as sliders, buttons, and checkboxes to manipulate properties and settings of a Three.js scene.
-import waterVertexShader from "./shaders/water/vertex.glsl";
-import waterFragmentShader from "./shaders/water/fragment.glsl";
-import { Sky } from "three/examples/jsm/objects/Sky.js";
-import { Water } from "three/examples/jsm/objects/Water.js";
 import calculateOfElevation from "./wavesYacht"; //This function is likely used to calculate the elevation of waves for a yacht in a 3D scene.
-import { addEngineControlsTo, engineController } from "./controls/engine_controls";
-import { addConstantsControlsTo, constantsController } from "./controls/constants_controls";
-import { addWindControlsTo, windController } from "./controls/wind_controls";
-import { addCurrentControlsTo, currentController } from "./controls/current_controls";
-import { addShipControlsTo, shipController } from "./controls/ship_controls";
-import { addFuelControlsTo, fuelController } from "./controls/fuel_controls";
-import { addWaveControlsTo, waveController } from "./controls/wave_controls";
+import { engineController } from "./controls/engine_controls";
+import { constantsController } from "./controls/constants_controls";
+import { windController } from "./controls/wind_controls";
+import { currentController } from "./controls/current_controls";
+import { shipController } from "./controls/ship_controls";
+import { fuelController } from "./controls/fuel_controls";
+import { waveController } from "./controls/wave_controls";
 import { forces, rotations } from "./functions";
 import "./statistics.js";
 import { checkCollisions } from "./collision.js";
 import { checkMovingYacht, initSoundSystem } from "./sounds.js";
 import { addAllModels, yachtModel } from "./models.js";
 import { updateKeyBoard } from "./keyboard.js";
-import { addLights } from "./lights.js";
-import { camera, initializeCamera, setupOrbitControls, toggleFreeCamera, updateCamera } from "./camera.js";
+import { camera, initializeCamera, updateCamera } from "./camera.js";
+import { handleWindowResize, initializeRenderer, initializeScene, renderer, scene } from "./sceneSetup.js";
+import { setupGUI } from "./controls.js";
+import { initializeEnvironment, water } from "./environment.js";
 
 /**
  * Base
  */
-
 export const ship = {
   position: {
     x: 0,
@@ -81,15 +77,6 @@ export const ship = {
   bouyanceForce: 0,
 };
 
-const gui = new dat.GUI({ width: 340 });
-addEngineControlsTo(gui)
-addFuelControlsTo(gui)
-addWaveControlsTo(gui)
-addConstantsControlsTo(gui);
-addWindControlsTo(gui)
-addCurrentControlsTo(gui)
-addShipControlsTo(gui)
-
 // Canvas
 const canvas = document.querySelector("canvas.webgl"); // is used to select the canvas element with the class name "webgl" and assign it to the variable canvas.
 //This is typically used when working with Three.js to specify the canvas element where the WebGL rendering will take place.
@@ -98,175 +85,31 @@ const canvas = document.querySelector("canvas.webgl"); // is used to select the 
 // Developers can manipulate and control the canvas to create dynamic and interactive 3D visuals using Three.js library.
 
 // Scene
-const scene = new THREE.Scene(); //This statement creates a new THREE.js scene, which is basically a container that holds all the objects, lights, cameras,
-
-// Lights
-addLights(scene)
-
-/**
- * Water
- */
-// Geometry
-const waterGeometry = new THREE.PlaneGeometry(2048, 2048, 512, 512);
-
-// Material
-const water = new Water(waterGeometry, {
-  textureWidth: 512,
-  textureHeight: 512,
-  waterNormals: new THREE.TextureLoader().load(
-    "/waternormals.jpg",
-    function (texture) {
-      texture.wrapS = texture.wrapT = THREE.RepeatWrapping; //Repeat water texture
-    }
-  ), //This is a texture used for water normals that is loaded from the "/waternormals.jpg" file. The texture is set to repeat wrapping.
-  sunDirection: new THREE.Vector3(), // The direction of the sun for lighting the water.
-  sunColor: 0xffffff, // The color of the sun for lighting the water.
-  waterColor: 0x001e0f, //The color of the water.
-  distortionScale: 3.7, //The scale of distortion applied to the water.
-  fog: scene.fog !== undefined, // Whether fog is enabled in the scene.
-  vertexShader: waterVertexShader,
-  fragmentShader: waterFragmentShader,
-  side: THREE.DoubleSide,
-});
-
-water.material.vertexShader = waterVertexShader;
-water.material.onBeforeCompile = function (shader) {
-  Object.keys(waveController).forEach((controller) => {
-    shader.uniforms[controller] = waveController[controller];
-  });
-};
-
-water.rotation.x = -Math.PI * 0.5;
-scene.add(water);
-
-/**
- * Sizes
- */
 const sizes = {
   width: window.innerWidth,
   height: window.innerHeight,
 };
-
-window.addEventListener("resize", () => {
-  // Update sizes
-  sizes.width = window.innerWidth;
-  sizes.height = window.innerHeight;
-
-  // Update camera
-  camera.aspect = sizes.width / sizes.height;
-  camera.updateProjectionMatrix();
-
-  // Update renderer
-  renderer.setSize(sizes.width, sizes.height);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  // This code adds an event listener for the "resize" event,
-  // which triggers when the window is resized.
-  // When the event is triggered,
-  //the code updates the sizes of the window,
-  //updates the aspect ratio of the camera based on the new window size,
-  //and updates the renderer to match the new window size and pixel ratio.
-  // This ensures that the content displayed on the webpage is responsive and adjusts properly when the window is resized.
-});
-
-/**
- * Camera
- */
-// Base camera
-
-initializeCamera(sizes, scene)
-initSoundSystem(camera)
+// Initializing Scene
+initializeScene()
+// Initializing Renderer
+initializeRenderer(canvas, sizes)
+// Initializing Camera
+initializeCamera(sizes)
+// Hadnling Window Resize
+handleWindowResize(sizes);
+// Initializing Sound System
+initSoundSystem()
+// Initializing GUI (Control Panel)
+setupGUI()
+// Initializing Environment
+initializeEnvironment()
+// Adding Models
+addAllModels()
 
 
-/**
- * Renderer
- */
-const renderer = new THREE.WebGLRenderer({
-  canvas: canvas,
-});
-renderer.setSize(sizes.width, sizes.height);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-// Sky and Sun
-let sky, sun;
-
-// Add Sky
-sky = new Sky();
-sky.scale.setScalar(10000);
-scene.add(sky);
-
-sun = new THREE.Vector3();
-
-/// GUI
-const effectController = {
-  turbidity: 10,
-  rayleigh: 3,
-  mieCoefficient: 0.005,
-  mieDirectionalG: 0.7,
-  elevation: 2,
-  azimuth: 180,
-  exposure: renderer.toneMappingExposure,
-};
-function guiChanged() {
-  // This code defines a function called guiChanged() that is used to update the sky and water materials
-  // in a three.js scene based on the values of certain parameters controlled by a GUI (graphical user interface).
-  const uniforms = sky.material.uniforms;
-  uniforms["turbidity"].value = effectController.turbidity;
-  uniforms["rayleigh"].value = effectController.rayleigh;
-  uniforms["mieCoefficient"].value = effectController.mieCoefficient;
-  uniforms["mieDirectionalG"].value = effectController.mieDirectionalG;
-
-  const phi = THREE.MathUtils.degToRad(90 - effectController.elevation);
-  const theta = THREE.MathUtils.degToRad(effectController.azimuth);
-
-  sun.setFromSphericalCoords(1, phi, theta);
-
-  uniforms["sunPosition"].value.copy(sun);
-  water.material.uniforms["sunDirection"].value.copy(sun).normalize();
-
-  renderer.toneMappingExposure = effectController.exposure;
-  try {
-    renderer.render(scene, camera);
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-const sunFolder = gui.addFolder("Sun");
-sunFolder.close();
-sunFolder
-  .add(effectController, "turbidity", 0.0, 20.0, 0.1)
-  .onChange(guiChanged);
-sunFolder.add(effectController, "rayleigh", 0.0, 4, 0.001).onChange(guiChanged);
-sunFolder
-  .add(effectController, "mieCoefficient", 0.0, 0.1, 0.001)
-  .onChange(guiChanged);
-sunFolder
-  .add(effectController, "mieDirectionalG", 0.0, 1, 0.001)
-  .onChange(guiChanged);
-sunFolder.add(effectController, "elevation", 0, 90, 0.1).onChange(guiChanged);
-sunFolder.add(effectController, "azimuth", -180, 180, 0.1).onChange(guiChanged);
-sunFolder.add(effectController, "exposure", 0, 1, 0.0001).onChange(guiChanged);
-
-guiChanged();
-/**
- * Animate
- */
-function init() {
-  Object.keys(waveController).forEach((controller) => {
-    water.material.uniforms[controller] = waveController[controller];
-  });
-}
-init();
 let prevTime = 0;
 var dir = new THREE.Vector3();
 var sph = new THREE.Spherical();
-addAllModels(scene, camera)
-
-setupOrbitControls(renderer);
-
-const cameraFolder = gui.addFolder("Camera");
-cameraFolder.add({ toggleFreeCamera }, 'toggleFreeCamera').name('Toggle Free Camera');
-cameraFolder.close();
-// Free Camera End--------------------------------------------------------------------------------------------------
 
 
 const clock = new THREE.Clock();
@@ -277,7 +120,6 @@ const tick = () => {
   prevTime = elapsedTime;
 
   updateKeyBoard(shipController, engineController)
-
   // Water
   water.material.uniforms["time"].value = elapsedTime;
   if (yachtModel) {
@@ -327,8 +169,6 @@ const tick = () => {
   // Overall, this code controls the animation and interaction in a three.js scene, updating the water, yacht model position, controls, and rendering the scene on each frame.
 
 }
-
-
 tick();
 
 function move(deltaTime) {
@@ -384,7 +224,6 @@ function move(deltaTime) {
     ship.velocity.z += accelerateZ * deltaTime;
     ship.position.addScaledVector(direction, ship.velocity.z * deltaTime);
   }
-  // ship.position.z += direction.z * ship.velocity.z * deltaTime;
 
   // Y
   ship.visRes.y = visResY;
