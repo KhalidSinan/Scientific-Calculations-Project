@@ -1,4 +1,3 @@
-import * as THREE from 'three'
 import * as dat from "lil-gui"; //dat.GUI can be used to add controls such as sliders, buttons, and checkboxes to manipulate properties and settings of a Three.js scene.
 import { toggleFreeCamera } from './camera';
 import { addEngineControlsTo } from "./controls/engine_controls";
