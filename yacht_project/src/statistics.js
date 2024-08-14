@@ -1,4 +1,4 @@
-import { ship } from "./script";
+import { ship } from "./ship";
 
 const statsButton = document.getElementById("statsButton");
 const restartButton = document.getElementById("restartSimulationButton");

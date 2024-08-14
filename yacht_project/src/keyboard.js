@@ -1,4 +1,6 @@
 import { toggleFreeCamera } from "./camera";
+import { engineController } from "./controls/engine_controls";
+import { shipController } from "./controls/ship_controls";
 
 const keys = {
     W: false,
@@ -16,7 +18,7 @@ document.addEventListener('keyup', event => {
     keys[event.key.toUpperCase()] = false;
 });
 
-function updateKeyBoard(shipController, engineController) {
+function updateKeyBoard() {
     if (keys['W']) {
         engineController.Vin += 0.01;
     }

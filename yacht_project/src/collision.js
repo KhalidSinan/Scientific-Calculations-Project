@@ -42,4 +42,28 @@ function checkCollisions(scene, yachtModel) {
     }
 }
 
+// For testing collision
+// function addCubesOnWater(numCubes, waterLevel) {
+//     const geometry = new THREE.BoxGeometry(10, 10, 10); // Size of the cubes
+
+//     for (let i = 0; i < numCubes; i++) {
+//       // Create a cube
+//       const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 }); // Color of the cubes
+//       const cube = new THREE.Mesh(geometry, material);
+
+//       // Randomize position
+//       const x = Math.random() * 2048 - 1024; // Adjust range as needed
+//       const z = Math.random() * 2048 - 1024; // Adjust range as needed
+
+//       // Position the cube
+//       cube.position.set(x, waterLevel, z);
+
+//       // Add the cube to the scene
+//       scene.add(cube);
+
+//       // Add bounding box to the cube
+//       cube.boundingBox = new THREE.Box3().setFromObject(cube);
+//     }
+//   }
+
 export { createBoundingBoxForYacht, checkCollisions }
