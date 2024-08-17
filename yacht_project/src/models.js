@@ -49,12 +49,18 @@ function addAllModels() {
         scene.add(lighthouseModel);
     });
 
-    gltfLoader.load("/models/island/scene.glb", (gltf) => {
-        gltf.scene.scale.set(10, 10, 10);
-        gltf.scene.translateZ(600);
-        gltf.scene.translateX(600);
+    gltfLoader.load("/models/rocks/scene.gltf", (gltf) => {
+        gltf.scene.scale.set(0.5, 0.5, 0.5);
+        gltf.scene.translateZ(1000);
+        gltf.scene.translateX(1000);
+        gltf.scene.rotateY(180);
         islandModel = gltf.scene;
         scene.add(islandModel);
+
+        islandModel.boundingBox = new THREE.Box3().setFromObject(islandModel, true);
+
+        const boxHelper = new THREE.BoxHelper(islandModel);
+        scene.add(boxHelper);
     });
 }
 
